@@ -15,10 +15,12 @@
 // http://localhost:8888/examples/extract/index.html
 // http://localhost:8888/zotfile/chrome/content/zotfile/pdfextract/extract.html
 
+  
 // Fetch the PDF document from the URL using promices
 //
 // PDFJS.getDocument('test2.pdf').then(function(pdf) {
-PDFJS.getDocument('/examples/helloworld/pdf/zotfile-test.pdf').then(function(pdf) {
+PDFJS.getDocument('/examples/extract/pdf/zotfile-test.pdf').then(function(pdf) {
+  console.log('dfdf');
   var annotations = [];
   // Using promise to fetch the page
 
