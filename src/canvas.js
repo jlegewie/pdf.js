@@ -1198,7 +1198,8 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
             for (var j = 0; j < this.annotations.length; j++) {
               var annot = this.annotations[j];
               var quad = this.charInAnnot(annot, charDims, ctx.user2dev);
-              this.updateMarkup(annot, quad, glyph.unicode, charDims, false);
+              this.updateMarkup(annot, quad, glyph.fontChar, charDims, false);
+              // if(quad>=1) console.log(glyph);
             }
           }
 
