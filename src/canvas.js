@@ -1028,7 +1028,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var ctx = this.ctx;
       var current = this.current;
       var font = current.font;
-      var glyphs = font.charsToGlyphs(str);
+      var glyphs = font.charsToGlyphs(str);      
       var fontSize = current.fontSize;
       var fontSizeScale = current.fontSizeScale;
       var charSpacing = current.charSpacing;
@@ -1190,8 +1190,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
             }
           }
           
-          if (this.annotations && ctx.user2dev) {
-            
+          if (this.annotations && ctx.user2dev) {            
             // check if glyph is within an annotation
             // var charDims = this.makeCharDims(glyph.width * fontSize * .001, x, font, ctx.mozCurrentTransform);
             var charDims = this.makeCharDims(width * fontSize * current.fontMatrix[0], x, font, ctx.mozCurrentTransform);            
@@ -1252,7 +1251,6 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         geom = this.createTextGeometry();
         ctx.restore();
       }
-
       for (var i = 0; i < arrLength; ++i) {
         var e = arr[i];
         if (isNum(e)) {
@@ -1274,7 +1272,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
               for (var j = 0; j < this.annotations.length; j++) {
                 var annot = this.annotations[j];
                 var quad = this.charInAnnot(annot, charDims, ctx.user2dev);
-                this.updateMarkup(annot, quad, ' ', charDims, true);                
+                this.updateMarkup(annot, quad, ' ', charDims, true); 
               }
             }
 
