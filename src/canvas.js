@@ -987,26 +987,39 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       * string associated with the given quad. */
     updateMarkup: function canvasGraphicsUpdateMarkup(annot, quad, character, charDims, isSpace) {      
       if (quad < 0) return;
+      // console.log(charDims);
+      charDims.char = character;
       if (!annot.markup) {
         annot.markup = [];
         annot.markupGeom = [];
+        annot.chars = [];
       }
       if (!annot.markup[quad]) {
         annot.markupGeom[quad] = {brx: charDims.x + charDims.width};
-        annot.markup[quad] = character;        
+        annot.markup[quad] = character;
+        annot.chars.push(charDims);
       } else {
         var markupEnd = annot.markup[quad].length - 1;
         var lastCharSpace = (annot.markup[quad].charAt(markupEnd) == ' ');
         if (isSpace && lastCharSpace) return;
 
         if (!isSpace && !lastCharSpace && charDims.spaceWidth != 0 &&
-            charDims.x > annot.markupGeom[quad].brx + charDims.spaceWidth) {
+          charDims.x > annot.markupGeom[quad].brx + charDims.spaceWidth) {
           annot.markup[quad] += ' ';
-        }        
-        if (annot.markupGeom[quad].brx < charDims.x + charDims.width) {
+          annot.chars.push(charDims);
+        }
+        if (!isSpace && annot.markupGeom[quad].brx < charDims.x + charDims.width) {          
           annot.markupGeom[quad].brx = charDims.x + charDims.width;
-          annot.markup[quad] += character;          
-        }        
+          annot.markup[quad] += character;
+          annot.chars.push(charDims);
+        }
+        if (isSpace) {
+          // do not add 'mini' spaces that are between to characters of one word
+          if((charDims.width/annot.chars.slice(-1)[0].width)<0.2) return; 
+          annot.markupGeom[quad].brx = charDims.x + charDims.width;
+          annot.markup[quad] += character;
+          annot.chars.push(charDims);
+        }
       }
 
     },
@@ -1250,11 +1263,9 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           }
 
           if (textSelection || this.annotations)
-            spacingAccumulator += spacingLength;
+            spacingAccumulator += spacingLength;          
 
-          
-
-          /*if (this.annotations && ctx.user2dev) {
+          if (this.annotations && ctx.user2dev) {
               var charDims =
                 this.makeCharDims(spacingLength,
                                   canvasWidth - spacingLength,
@@ -1264,7 +1275,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
                 var quad = this.charInAnnot(annot, charDims, ctx.user2dev);
                 this.updateMarkup(annot, quad, ' ', charDims, true);                
               }
-            }*/
+            }
 
         } else if (isString(e)) {
           var shownCanvasWidth = this.showText(e, true);
