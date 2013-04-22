@@ -311,14 +311,13 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
       var continueCallback = params.continueCallback;
 
       // Once the operatorList and fonts are loaded, do the actual rendering.
-      this.displayReadyPromise.then(
-        function pageDisplayReadyPromise() {
-          if (self.destroyed) {
-            complete();
-            return;
-          }
-          // get annotations...
-          this.getAnnotations().then(function(annos) {            
+      this.getAnnotations().then(function(annos) {
+        this.displayReadyPromise.then(
+          function pageDisplayReadyPromise() {
+            if (self.destroyed) {
+              complete();
+              return;
+            }
             var gfx = new CanvasGraphics(params.canvasContext, this.commonObjs,
               this.objs, params.textLayer, params.imageLayer, annos);
             try {
@@ -326,12 +325,13 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
             } catch (e) {
               complete(e);
             }
-          }.bind(this));
-        }.bind(this),
-        function pageDisplayReadPromiseError(reason) {
-          complete(reason);
-        }
-      );
+
+          }.bind(this),
+          function pageDisplayReadPromiseError(reason) {
+            complete(reason);
+          }
+        );
+      }.bind(this));
 
       return promise;
     },
