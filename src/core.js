@@ -320,6 +320,7 @@ var Page = (function PageClosure() {
     },
 
     getAnnotationsBase: function Page_getAnnotationsBase() {
+      if (this.annotationsList) return this.annotationsList; 
       var xref = this.xref;
       function getInheritableProperty(annotation, name) {
         var item = annotation;
@@ -362,8 +363,29 @@ var Page = (function PageClosure() {
 
         var item = {};
         item.type = subtype.name;
+        // list of quad regions
+        item.quadPoints = [];
+        var quadpts = annotation.get('QuadPoints') || [];
+        for (var j = 0; j < quadpts.length; j += 8) {
+          // NB: we don't transform the quadpoints here, but later once we know
+          // the user space => device space transformation.
+          var topLeft = {x: quadpts[j + 4], y: quadpts[j + 5]};
+          var bottomRight = {x: quadpts[j + 2], y: quadpts[j + 3]};
+          var quad = {};
+          quad.x = Math.min(topLeft.x, bottomRight.x);
+          quad.y = Math.min(topLeft.y, bottomRight.y);
+          quad.width = Math.abs(topLeft.x - bottomRight.x);
+          quad.height = Math.abs(topLeft.y - bottomRight.y);
+          item.quadPoints.push(quad);
+        }
         var rect = annotation.get('Rect');
         item.rect = Util.normalizeRect(rect);
+        // var topLeftCorner = this.rotatePoint(rect[0], rect[1]);
+        // var bottomRightCorner = this.rotatePoint(rect[2], rect[3]);
+        // item.x = Math.min(topLeftCorner.x, bottomRightCorner.x);
+        // item.y = Math.min(topLeftCorner.y, bottomRightCorner.y);
+        // item.width = Math.abs(topLeftCorner.x - bottomRightCorner.x);
+        // item.height = Math.abs(topLeftCorner.y - bottomRightCorner.y);
 
         var includeAnnotation = true;
         switch (subtype.name) {
@@ -460,10 +482,18 @@ var Page = (function PageClosure() {
           case 'Text':
             var content = annotation.get('Contents');
             var title = annotation.get('T');
+            var name = annotation.get('Name'); 
             item.content = stringToPDFString(content || '');
             item.title = stringToPDFString(title || '');
-            item.name = !annotation.has('Name') ? 'Note' :
-              annotation.get('Name').name;
+            item.name = name ? name.name : 'Note';            
+            break;
+          case 'Highlight':
+          case 'Underline':
+            var content = annotation.get('Contents');
+            var title = annotation.get('T');
+            // sometimes there's no content, only markup
+            if (content) item.content = stringToPDFString(content);
+            item.title = stringToPDFString(title || '');
             break;
           default:
             var appearance = getDefaultAnnotationAppearance(annotation);

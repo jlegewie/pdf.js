@@ -214,7 +214,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
   // before it stops and shedules a continue of execution.
   var EXECUTION_TIME = 15;
 
-  function CanvasGraphics(canvasCtx, commonObjs, objs, textLayer, imageLayer) {
+  function CanvasGraphics(canvasCtx, commonObjs, objs, textLayer, imageLayer, annotations) {
     this.ctx = canvasCtx;
     this.current = new CanvasExtraState();
     this.stateStack = [];
@@ -224,6 +224,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     this.commonObjs = commonObjs;
     this.objs = objs;
     this.textLayer = textLayer;
+    this.annotations = annotations;
     this.imageLayer = imageLayer;
     this.groupStack = [];
     if (canvasCtx) {
@@ -436,6 +437,14 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var transform = viewport.transform;
       this.ctx.save();
       this.ctx.transform.apply(this.ctx, transform);
+
+      // Record the user => device transformation so we can transform annotation
+      // bounding boxes appropriately
+      if (this.ctx.mozCurrentTransform) {
+        this.ctx.user2dev = this.ctx.mozCurrentTransform.slice(0, 6);
+      } else {
+        this.ctx.user2dev = IDENTITY_MATRIX;        
+      }
 
       if (this.textLayer) {
         this.textLayer.beginLayout();
@@ -931,6 +940,76 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       geometry.fontSize = this.current.fontSize;
       return geometry;
     },
+    /** Compute the coordinates and width of the character given its width and
+      * x-offset in font space, a font object, and a matrix used for transforming
+      * from font space to device space. Returns an object with the character's
+      * x, y, and width properties, and the width of a space in the given font,
+      * all in device space.
+      */
+    makeCharDims: function canvasMakeCharDims(charWidth, xOffset, font, font2dev) {
+      var xy = Util.applyTransform([xOffset, 0], font2dev);
+      var w = Util.applyTransform([xOffset + charWidth, 0], font2dev);
+      var dims = {x: xy[0], y: xy[1]};
+      dims.width = Math.abs(xy[0] - w[0]);
+      var spaceWidth = font.coded ? font.spaceWidth : font.spaceWidth * .001;
+      var sw = Util.applyTransform([spaceWidth,0], font2dev);
+      dims.spaceWidth = (sw[0] - font2dev[4]) / 2.0;      
+      return dims;
+    },
+    /** Determines if character, with the given dimensions, falls within the
+      * bounds of annotation annot. If so, returns the 0-based index of the quad
+      * region within which the character falls. If the character is outside the
+      * annotation, returns -1. */
+    charInAnnot: function canvasCharInAnnot(annot, cdims, user2dev) {
+      if (annot.type && (annot.type == 'Highlight' ||
+                         annot.type == 'Underline')) {
+        for (var i = 0; i < annot.quadPoints.length; i++) {
+          var quad = annot.quadPoints[i];
+          var qxy0 = Util.applyTransform([quad.x, quad.y], user2dev);
+          var quadOtherCorner = [quad.x + quad.width, quad.y + quad.height];
+          var qxy1 = Util.applyTransform(quadOtherCorner, user2dev);
+          var minX = Math.min(qxy0[0], qxy1[0]);
+          var maxX = Math.max(qxy0[0], qxy1[0]);
+          var minY = Math.min(qxy0[1], qxy1[1]);
+          var maxY = Math.max(qxy0[1], qxy1[1]);
+          // only grab characters where 50% of the character's
+          // width lies within the annotation
+          var xPlusHalfWidth = cdims.x + (0.5 * cdims.width);
+          if (xPlusHalfWidth >= minX && xPlusHalfWidth <= maxX &&
+              cdims.y >= minY && cdims.y <= maxY) {            
+            return i;
+          }
+        }
+      }
+      return -1;
+    },
+    /** Update the markup array for annot, placing the given character into the
+      * string associated with the given quad. */
+    updateMarkup: function canvasGraphicsUpdateMarkup(annot, quad, character, charDims, isSpace) {      
+      if (quad < 0) return;
+      if (!annot.markup) {
+        annot.markup = [];
+        annot.markupGeom = [];
+      }
+      if (!annot.markup[quad]) {
+        annot.markupGeom[quad] = {brx: charDims.x + charDims.width};
+        annot.markup[quad] = character;        
+      } else {
+        var markupEnd = annot.markup[quad].length - 1;
+        var lastCharSpace = (annot.markup[quad].charAt(markupEnd) == ' ');
+        if (isSpace && lastCharSpace) return;
+
+        if (!isSpace && !lastCharSpace && charDims.spaceWidth != 0 &&
+            charDims.x > annot.markupGeom[quad].brx + charDims.spaceWidth) {
+          annot.markup[quad] += ' ';
+        }        
+        if (annot.markupGeom[quad].brx < charDims.x + charDims.width) {
+          annot.markupGeom[quad].brx = charDims.x + charDims.width;
+          annot.markup[quad] += character;          
+        }        
+      }
+
+    },
 
     showText: function CanvasGraphics_showText(str, skipTextSelection) {
       var ctx = this.ctx;
@@ -952,7 +1031,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var vertical = font.vertical;
       var defaultVMetrics = font.defaultVMetrics;
 
-      // Type3 fonts - each glyph is a "mini-PDF"
+      // Type3 fonts - each glyph is a "mini-PDF"      
       if (font.coded) {
         ctx.save();
         ctx.transform.apply(ctx, current.textMatrix);
@@ -960,7 +1039,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
         ctx.scale(textHScale, 1);
 
-        if (textSelection) {
+        if (textSelection || this.annotation) {
           this.save();
           ctx.scale(1, -1);
           geom = this.createTextGeometry();
@@ -989,6 +1068,18 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           ctx.translate(width, 0);
           current.x += width * textHScale;
 
+
+          if (this.annotations && ctx.user2dev) {
+            // check if glyph is within an annotation
+            var chDims = this.makeCharDims(transformed[0] * fontSize, width,
+                                           font, ctx.mozCurrentTransform);
+            for (var j = 0; j < this.annotations.length; j++) {
+              var annot = this.annotations[j];              
+              var quad = this.charInAnnot(annot, chDims, ctx.user2dev);
+              this.updateMarkup(annot, quad, glyph.unicode, chDims, false);              
+            }
+          }
+          
           canvasWidth += width;
         }
         ctx.restore();
@@ -1004,7 +1095,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         else
           lineWidth /= scale;
 
-        if (textSelection)
+        if (textSelection || this.annotations)
           geom = this.createTextGeometry();
 
         if (fontSizeScale != 1.0) {
@@ -1014,7 +1105,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
         ctx.lineWidth = lineWidth;
 
-        var x = 0;
+        var x = 0;        
         for (var i = 0; i < glyphsLength; ++i) {
           var glyph = glyphs[i];
           if (glyph === null) {
@@ -1085,6 +1176,18 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
               }
             }
           }
+          
+          if (this.annotations && ctx.user2dev) {
+            
+            // check if glyph is within an annotation
+            // var charDims = this.makeCharDims(glyph.width * fontSize * .001, x, font, ctx.mozCurrentTransform);
+            var charDims = this.makeCharDims(width * fontSize * current.fontMatrix[0], x, font, ctx.mozCurrentTransform);            
+            for (var j = 0; j < this.annotations.length; j++) {
+              var annot = this.annotations[j];
+              var quad = this.charInAnnot(annot, charDims, ctx.user2dev);
+              this.updateMarkup(annot, quad, glyph.unicode, charDims, false);
+            }
+          }
 
           x += charWidth;
 
@@ -1124,12 +1227,14 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var geom;
       var canvasWidth = 0.0;
       var textSelection = textLayer ? true : false;
+      var font2dev = [];
       var vertical = font.vertical;
       var spacingAccumulator = 0;
 
-      if (textSelection) {
+      if (textSelection || this.annotations) {
         ctx.save();
         this.applyTextTransforms();
+        font2dev = ctx.mozCurrentTransform.slice(0, 6);
         geom = this.createTextGeometry();
         ctx.restore();
       }
@@ -1144,12 +1249,27 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
             current.x += spacingLength;
           }
 
-          if (textSelection)
+          if (textSelection || this.annotations)
             spacingAccumulator += spacingLength;
+
+          
+
+          /*if (this.annotations && ctx.user2dev) {
+              var charDims =
+                this.makeCharDims(spacingLength,
+                                  canvasWidth - spacingLength,
+                                  font, font2dev);              
+              for (var j = 0; j < this.annotations.length; j++) {
+                var annot = this.annotations[j];
+                var quad = this.charInAnnot(annot, charDims, ctx.user2dev);
+                this.updateMarkup(annot, quad, ' ', charDims, true);                
+              }
+            }*/
+
         } else if (isString(e)) {
           var shownCanvasWidth = this.showText(e, true);
 
-          if (textSelection) {
+          if (textSelection || this.annotations) {
             canvasWidth += spacingAccumulator + shownCanvasWidth;
             spacingAccumulator = 0;
           }

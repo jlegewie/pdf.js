@@ -317,14 +317,16 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
             complete();
             return;
           }
-
-          var gfx = new CanvasGraphics(params.canvasContext, this.commonObjs,
-            this.objs, params.textLayer, params.imageLayer);
-          try {
-            this.display(gfx, params.viewport, complete, continueCallback);
-          } catch (e) {
-            complete(e);
-          }
+          // get annotations...
+          this.getAnnotations().then(function(annos) {            
+            var gfx = new CanvasGraphics(params.canvasContext, this.commonObjs,
+              this.objs, params.textLayer, params.imageLayer, annos);
+            try {
+              this.display(gfx, params.viewport, complete, continueCallback);
+            } catch (e) {
+              complete(e);
+            }
+          }.bind(this));
         }.bind(this),
         function pageDisplayReadPromiseError(reason) {
           complete(reason);
