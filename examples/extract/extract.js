@@ -19,8 +19,7 @@
 // Fetch the PDF document from the URL using promices
 //
 // PDFJS.getDocument('test2.pdf').then(function(pdf) {
-PDFJS.getDocument('/examples/extract/pdf/zotfile-test.pdf').then(function(pdf) {
-  console.log('dfdf');
+PDFJS.getDocument('/examples/extract/pdf/hard3.pdf').then(function(pdf) {
   var annotations = [];
   // Using promise to fetch the page
 
