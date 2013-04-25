@@ -11,12 +11,14 @@
 const SUPPORTED_ANNOTS = ["Text", "Highlight", "Underline"]
 
 // Fetch the PDF document from the URL using promices
-PDFJS.getDocument('/examples/extract/pdf/test2.pdf').then(function(pdf) {
+
+PDFJS.getDocument('/test/pdfs/Williams - 1994 - Pragmatism and Faith Selznicks Complex Commonwea.pdf').then(function(pdf) {
+// PDFJS.getDocument('/examples/extract/pdf/Ristanovic_Protic_2012_Once Upon a Pocket.pdf').then(function(pdf) {
   var annotations = [],
       numPages = pdf.numPages;
 
   // function to handle page (render and extract annotations)
-  var extract = function(page) {    
+  var extract = function(page) {
       var scale = 1;
       var viewport = page.getViewport(scale);
 
@@ -34,10 +36,14 @@ PDFJS.getDocument('/examples/extract/pdf/test2.pdf').then(function(pdf) {
       // get annotations
       var annotations;
       page.getAnnotations().then(function extractAnno(annos) {
+        console.log('Page: '+page.pageNumber + " ("+annos.length+" annotations)");
         // filter for supported annotations
         annotations = annos.filter(function(anno) {return SUPPORTED_ANNOTS.indexOf(anno.type) >= 0;});
         // skip page if there is nothing interesting
-        if (annotations.length==0) return;
+        if (annotations.length==0) {
+          pdf.getPage(page.pageNumber+1).then(extract);
+          return;
+        }
         // render page
         page.render(renderContext).then(function() {
           // show annotations
@@ -49,10 +55,17 @@ PDFJS.getDocument('/examples/extract/pdf/test2.pdf').then(function(pdf) {
         },
         // error handler for page
         function(error) {
+          console.log(error);
           // continue with next page
           if(numPages>page.pageNumber) pdf.getPage(page.pageNumber+1).then(extract);
         });
 
+      },
+      // error handler for page
+      function(error) {
+        console.log(error);
+        // continue with next page
+        if(numPages>page.pageNumber) pdf.getPage(page.pageNumber+1).then(extract);
       });
     };
 
