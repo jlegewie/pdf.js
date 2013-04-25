@@ -48,8 +48,8 @@ PDFJS.getDocument('/examples/extract/pdf/test2.pdf').then(function(pdf) {
           if(numPages>page.pageNumber) pdf.getPage(page.pageNumber+1).then(extract);
         },
         // error handler for page
-        function(error) {          
-          // render next page
+        function(error) {
+          // continue with next page
           if(numPages>page.pageNumber) pdf.getPage(page.pageNumber+1).then(extract);
         });
 
