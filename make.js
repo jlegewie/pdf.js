@@ -29,8 +29,11 @@ var ROOT_DIR = __dirname + '/', // absolute path to project's root
     BUILD_DIR = 'build/',
     SRC_DIR = 'src/',
     BUILD_TARGET = BUILD_DIR + 'pdf.js',
+    BUILD_WORKER_TARGET = BUILD_DIR + 'pdf.worker.js',
+    BUILD_TARGETS = [BUILD_TARGET, BUILD_WORKER_TARGET],
     FIREFOX_BUILD_DIR = BUILD_DIR + '/firefox/',
-    CHROME_BUILD_DIR = BUILD_DIR + '/chrome/',
+    CHROME_BUILD_DIR = BUILD_DIR + '/chromium/',
+    B2G_BUILD_DIR = BUILD_DIR + '/b2g/',
     EXTENSION_SRC_DIR = 'extensions/',
     LOCALE_SRC_DIR = 'l10n/',
     GH_PAGES_DIR = BUILD_DIR + 'gh-pages/',
@@ -70,8 +73,7 @@ target.all = function() {
 
 // Files that need to be included in every build.
 var COMMON_WEB_FILES =
-      ['web/viewer.css',
-       'web/images',
+      ['web/images',
        'web/debugger.js'],
     COMMON_WEB_FILES_PREPROCESS =
       ['web/viewer.js',
@@ -83,7 +85,7 @@ var COMMON_WEB_FILES =
 // modern HTML5 browsers.
 //
 target.generic = function() {
-  target.bundle();
+  target.bundle({});
   target.locale();
 
   cd(ROOT_DIR);
@@ -102,16 +104,19 @@ target.generic = function() {
     copy: [
       [COMMON_WEB_FILES, GENERIC_DIR + '/web'],
       ['external/webL10n/l10n.js', GENERIC_DIR + '/web'],
+      ['web/viewer.css', GENERIC_DIR + '/web'],
       ['web/compatibility.js', GENERIC_DIR + '/web'],
       ['web/compressed.tracemonkey-pldi-09.pdf', GENERIC_DIR + '/web'],
       ['web/locale', GENERIC_DIR + '/web']
     ],
     preprocess: [
-      [BUILD_TARGET, GENERIC_DIR + BUILD_TARGET],
+      [BUILD_TARGETS, GENERIC_DIR + BUILD_DIR],
       [COMMON_WEB_FILES_PREPROCESS, GENERIC_DIR + '/web']
     ]
   };
   builder.build(setup);
+
+  cleanupJSSource(GENERIC_DIR + '/web/viewer.js');
 };
 
 //
@@ -123,6 +128,7 @@ target.generic = function() {
 target.web = function() {
   target.generic();
   target.extension();
+  target.b2g();
 
   echo();
   echo('### Creating web site');
@@ -134,15 +140,17 @@ target.web = function() {
   mkdir('-p', GH_PAGES_DIR + '/web/images');
   mkdir('-p', GH_PAGES_DIR + BUILD_DIR);
   mkdir('-p', GH_PAGES_DIR + EXTENSION_SRC_DIR + '/firefox');
-  mkdir('-p', GH_PAGES_DIR + EXTENSION_SRC_DIR + '/chrome');
+  mkdir('-p', GH_PAGES_DIR + EXTENSION_SRC_DIR + '/chromium');
+  mkdir('-p', GH_PAGES_DIR + EXTENSION_SRC_DIR + '/b2g');
 
   cp('-R', GENERIC_DIR + '/*', GH_PAGES_DIR);
   cp(FIREFOX_BUILD_DIR + '/*.xpi', FIREFOX_BUILD_DIR + '/*.rdf',
      GH_PAGES_DIR + EXTENSION_SRC_DIR + 'firefox/');
   cp(CHROME_BUILD_DIR + '/*.crx', FIREFOX_BUILD_DIR + '/*.rdf',
-     GH_PAGES_DIR + EXTENSION_SRC_DIR + 'chrome/');
+     GH_PAGES_DIR + EXTENSION_SRC_DIR + 'chromium/');
   cp('web/index.html.template', GH_PAGES_DIR + '/index.html');
   cp('-R', 'test/features', GH_PAGES_DIR);
+  cp('-R', B2G_BUILD_DIR, GH_PAGES_DIR + EXTENSION_SRC_DIR + 'b2g/');
 
   cd(GH_PAGES_DIR);
   exec('git init');
@@ -222,6 +230,7 @@ target.locale = function() {
 //
 target.bundle = function(args) {
   args = args || {};
+  var defines = args.defines || DEFINES;
   var excludes = args.excludes || [];
 
   target.buildnumber();
@@ -229,73 +238,105 @@ target.bundle = function(args) {
   cd(ROOT_DIR);
   echo();
   echo('### Bundling files into ' + BUILD_TARGET);
+  var reg = /\n\/\* -\*- Mode(.|\n)*?Mozilla Foundation(.|\n)*?'use strict';/g;
 
-  var SRC_FILES =
-       ['network.js',
-        'chunked_stream.js',
-        'pdf_manager.js',
-        'core.js',
-        'util.js',
-        'api.js',
-        'canvas.js',
-        'obj.js',
-        'function.js',
-        'charsets.js',
-        'cidmaps.js',
-        'colorspace.js',
-        'crypto.js',
-        'evaluator.js',
-        'fonts.js',
-        'glyphlist.js',
-        'image.js',
-        'metrics.js',
-        'parser.js',
-        'pattern.js',
-        'stream.js',
-        'worker.js',
-        'jpx.js',
-        'jbig2.js',
-        'bidi.js',
-        'metadata.js'];
-
-  for (var i = 0, length = excludes.length; i < length; ++i) {
-    var exclude = excludes[i];
-    var index = SRC_FILES.indexOf(exclude);
-    if (index >= 0) {
-      SRC_FILES.splice(index, 1);
+  function bundle(filename, dir, SRC_FILES, EXT_SRC_FILES) {
+    for (var i = 0, length = excludes.length; i < length; ++i) {
+      var exclude = excludes[i];
+      var index = SRC_FILES.indexOf(exclude);
+      if (index >= 0) {
+        SRC_FILES.splice(index, 1);
+      }
     }
-  }
 
-  var EXT_SRC_FILES = [
-        '../external/jpgjs/jpg.js'];
+    var bundle = cat(SRC_FILES),
+        bundleVersion = EXTENSION_VERSION,
+        bundleBuild = exec('git log --format="%h" -n 1',
+          {silent: true}).output.replace('\n', '');
+
+    crlfchecker.checkIfCrlfIsPresent(SRC_FILES);
+
+    // Strip out all the vim/license headers.
+    bundle = bundle.replace(reg, '');
+
+    // Append external files last since we don't want to modify them.
+    bundle += cat(EXT_SRC_FILES);
+
+    // This just preprocesses the empty pdf.js file, we don't actually want to
+    // preprocess everything yet since other build targets use this file.
+    builder.preprocess(filename, dir, builder.merge(defines,
+                           {BUNDLE: bundle,
+                            BUNDLE_VERSION: bundleVersion,
+                            BUNDLE_BUILD: bundleBuild}));
+  }
 
   if (!test('-d', BUILD_DIR))
     mkdir(BUILD_DIR);
 
-  cd(SRC_DIR);
-  var bundle = cat(SRC_FILES),
-      bundleVersion = EXTENSION_VERSION,
-      bundleBuild = exec('git log --format="%h" -n 1',
-        {silent: true}).output.replace('\n', '');
+  var MAIN_SRC_FILES = [
+    'shared/util.js',
+    'shared/colorspace.js',
+    'shared/pattern.js',
+    'shared/function.js',
+    'shared/annotation.js',
+    'display/api.js',
+    'display/metadata.js',
+    'display/canvas.js',
+    'display/font_loader.js'
+  ];
 
-  crlfchecker.checkIfCrlfIsPresent(SRC_FILES);
+  var WORKER_SRC_FILES = [
+    'shared/util.js',
+    'shared/pattern.js',
+    'shared/function.js',
+    'shared/annotation.js',
+    'core/network.js',
+    'core/chunked_stream.js',
+    'core/pdf_manager.js',
+    'core/core.js',
+    'core/obj.js',
+    'core/charsets.js',
+    'core/cidmaps.js',
+    'shared/colorspace.js',
+    'core/crypto.js',
+    'core/evaluator.js',
+    'core/fonts.js',
+    'core/font_renderer.js',
+    'core/glyphlist.js',
+    'core/image.js',
+    'core/metrics.js',
+    'core/parser.js',
+    'core/stream.js',
+    'core/worker.js',
+    'core/jpx.js',
+    'core/jbig2.js',
+    'core/bidi.js',
+    'core/cmap.js'
+  ];
+
+  var EXT_SRC_FILES = [
+    '../external/jpgjs/jpg.js'
+  ];
+
+  cd(SRC_DIR);
+
+  bundle('pdf.js', ROOT_DIR + BUILD_TARGET, MAIN_SRC_FILES, []);
+  var srcCopy = ROOT_DIR + BUILD_DIR + 'pdf.worker.js.temp';
+  cp('pdf.js', srcCopy);
+  bundle(srcCopy, ROOT_DIR + BUILD_WORKER_TARGET, WORKER_SRC_FILES,
+         EXT_SRC_FILES);
+  rm(srcCopy);
+};
+
+function cleanupJSSource(file) {
+  var content = cat(file);
 
   // Strip out all the vim/license headers.
   var reg = /\n\/\* -\*- Mode(.|\n)*?Mozilla Foundation(.|\n)*?'use strict';/g;
-  bundle = bundle.replace(reg, '');
+  content = content.replace(reg, '');
 
-  // Append external files last since we don't want to modify them.
-  bundle += cat(EXT_SRC_FILES);
-
-  // This just preprocesses the empty pdf.js file, we don't actually want to
-  // preprocess everything yet since other build targets use this file.
-  builder.preprocess('pdf.js', ROOT_DIR + BUILD_TARGET,
-                         {BUNDLE: bundle,
-                          BUNDLE_VERSION: bundleVersion,
-                          BUNDLE_BUILD: bundleBuild});
-};
-
-
+  content.to(file);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -317,7 +358,7 @@ target.extension = function() {
 
   target.locale();
   target.firefox();
-  target.chrome();
+  target.chromium();
 };
 
 target.buildnumber = function() {
@@ -370,7 +411,7 @@ target.firefox = function() {
       FIREFOX_AMO_EXTENSION_NAME = 'pdf.js.amo.xpi';
 
   target.locale();
-  target.bundle({ excludes: ['network.js'] });
+  target.bundle({ excludes: ['core/network.js'], defines: defines });
   cd(ROOT_DIR);
 
   // Clear out everything in the firefox extension build directory
@@ -382,6 +423,9 @@ target.firefox = function() {
   cp(FIREFOX_CONTENT_DIR + 'PdfJs-stub.jsm',
      FIREFOX_BUILD_CONTENT_DIR + 'PdfJs.jsm');
 
+  cp(FIREFOX_CONTENT_DIR + 'PdfJsTelemetry-addon.jsm',
+     FIREFOX_BUILD_CONTENT_DIR + 'PdfJsTelemetry.jsm');
+
   // Copy extension files
   cd(FIREFOX_EXTENSION_DIR);
   cp('-R', FIREFOX_EXTENSION_FILES_TO_COPY, ROOT_DIR + FIREFOX_BUILD_DIR);
@@ -392,15 +436,22 @@ target.firefox = function() {
     copy: [
       [COMMON_WEB_FILES, FIREFOX_BUILD_CONTENT_DIR + '/web'],
       [FIREFOX_EXTENSION_DIR + 'tools/l10n.js',
-       FIREFOX_BUILD_CONTENT_DIR + '/web']
+       FIREFOX_BUILD_CONTENT_DIR + '/web'],
+      ['web/default_preferences.js', FIREFOX_BUILD_CONTENT_DIR]
     ],
     preprocess: [
       [COMMON_WEB_FILES_PREPROCESS, FIREFOX_BUILD_CONTENT_DIR + '/web'],
-      [BUILD_TARGET, FIREFOX_BUILD_CONTENT_DIR + BUILD_TARGET],
-      [SRC_DIR + 'network.js', FIREFOX_BUILD_CONTENT_DIR]
+      [BUILD_TARGETS, FIREFOX_BUILD_CONTENT_DIR + BUILD_DIR],
+      [SRC_DIR + 'core/network.js', FIREFOX_BUILD_CONTENT_DIR]
+    ],
+    preprocessCSS: [
+      ['firefox', 'web/viewer.css',
+       FIREFOX_BUILD_CONTENT_DIR + '/web/viewer.css']
     ]
   };
   builder.build(setup);
+
+  cleanupJSSource(FIREFOX_BUILD_CONTENT_DIR + '/web/viewer.js');
 
   // Remove '.DS_Store' and other hidden files
   find(FIREFOX_BUILD_DIR).forEach(function(file) {
@@ -476,7 +527,7 @@ target.mozcentral = function() {
          'content',
          'LICENSE'];
 
-  target.bundle({ excludes: ['network.js'] });
+  target.bundle({ excludes: ['core/network.js'], defines: defines });
   cd(ROOT_DIR);
 
   // Clear out everything in the firefox extension build directory
@@ -487,6 +538,7 @@ target.mozcentral = function() {
   mkdir('-p', MOZCENTRAL_CONTENT_DIR + '/web');
 
   cp(FIREFOX_CONTENT_DIR + 'PdfJs.jsm', MOZCENTRAL_CONTENT_DIR);
+  cp(FIREFOX_CONTENT_DIR + 'PdfJsTelemetry.jsm', MOZCENTRAL_CONTENT_DIR);
 
   // Copy extension files
   cd('extensions/firefox');
@@ -500,15 +552,21 @@ target.mozcentral = function() {
     defines: defines,
     copy: [
       [COMMON_WEB_FILES, MOZCENTRAL_CONTENT_DIR + '/web'],
-      ['extensions/firefox/tools/l10n.js', MOZCENTRAL_CONTENT_DIR + '/web']
+      ['extensions/firefox/tools/l10n.js', MOZCENTRAL_CONTENT_DIR + '/web'],
+      ['web/default_preferences.js', MOZCENTRAL_CONTENT_DIR]
     ],
     preprocess: [
       [COMMON_WEB_FILES_PREPROCESS, MOZCENTRAL_CONTENT_DIR + '/web'],
-      [BUILD_TARGET, MOZCENTRAL_CONTENT_DIR + BUILD_TARGET],
-      [SRC_DIR + 'network.js', MOZCENTRAL_CONTENT_DIR]
+      [BUILD_TARGETS, MOZCENTRAL_CONTENT_DIR + BUILD_DIR],
+      [SRC_DIR + 'core/network.js', MOZCENTRAL_CONTENT_DIR]
+    ],
+    preprocessCSS: [
+      ['firefox', 'web/viewer.css', MOZCENTRAL_CONTENT_DIR + '/web/viewer.css']
     ]
   };
   builder.build(setup);
+
+  cleanupJSSource(MOZCENTRAL_CONTENT_DIR + '/web/viewer.js');
 
   // Remove '.DS_Store' and other hidden files
   find(MOZCENTRAL_DIR).forEach(function(file) {
@@ -550,10 +608,9 @@ target.b2g = function() {
 
   echo();
   echo('### Building B2G (Firefox OS App)');
-  var B2G_BUILD_DIR = BUILD_DIR + '/b2g/',
-      B2G_BUILD_CONTENT_DIR = B2G_BUILD_DIR + '/content/';
+  var B2G_BUILD_CONTENT_DIR = B2G_BUILD_DIR + '/content/';
   var defines = builder.merge(DEFINES, { B2G: true });
-  target.bundle();
+  target.bundle({ defines: defines });
 
   // Clear out everything in the b2g build directory
   cd(ROOT_DIR);
@@ -573,25 +630,27 @@ target.b2g = function() {
     ],
     preprocess: [
       ['web/viewer.js', B2G_BUILD_CONTENT_DIR + '/web'],
-      [BUILD_TARGET, B2G_BUILD_CONTENT_DIR + BUILD_TARGET]
+      [BUILD_TARGETS, B2G_BUILD_CONTENT_DIR + BUILD_DIR]
     ]
   };
   builder.build(setup);
+
+  cleanupJSSource(B2G_BUILD_CONTENT_DIR + '/web/viewer.js');
 };
 
 //
 // make chrome
 //
-target.chrome = function() {
+target.chromium = function() {
   cd(ROOT_DIR);
   echo();
-  echo('### Building Chrome extension');
+  echo('### Building Chromium extension');
   var defines = builder.merge(DEFINES, {CHROME: true});
 
-  var CHROME_BUILD_DIR = BUILD_DIR + '/chrome/',
+  var CHROME_BUILD_DIR = BUILD_DIR + '/chromium/',
       CHROME_BUILD_CONTENT_DIR = CHROME_BUILD_DIR + '/content/';
 
-  target.bundle();
+  target.bundle({ defines: defines });
   cd(ROOT_DIR);
 
   // Clear out everything in the chrome extension build directory
@@ -604,21 +663,24 @@ target.chrome = function() {
     defines: defines,
     copy: [
       [COMMON_WEB_FILES, CHROME_BUILD_CONTENT_DIR + '/web'],
-      [['extensions/chrome/*.json',
-        'extensions/chrome/*.html',
-        'extensions/chrome/*.js',
-        'extensions/chrome/*.css',
-        'extensions/chrome/icon*.png',],
+      [['extensions/chromium/*.json',
+        'extensions/chromium/*.html',
+        'extensions/chromium/*.js',
+        'extensions/chromium/*.css',
+        'extensions/chromium/icon*.png',],
        CHROME_BUILD_DIR],
       ['external/webL10n/l10n.js', CHROME_BUILD_CONTENT_DIR + '/web'],
+      ['web/viewer.css', CHROME_BUILD_CONTENT_DIR + '/web'],
       ['web/locale', CHROME_BUILD_CONTENT_DIR + '/web']
     ],
     preprocess: [
-      [BUILD_TARGET, CHROME_BUILD_CONTENT_DIR + BUILD_TARGET],
+      [BUILD_TARGETS, CHROME_BUILD_CONTENT_DIR + BUILD_DIR],
       [COMMON_WEB_FILES_PREPROCESS, CHROME_BUILD_CONTENT_DIR + '/web']
     ]
   };
   builder.build(setup);
+
+  cleanupJSSource(CHROME_BUILD_CONTENT_DIR + '/web/viewer.js');
 
   // Update the build version number
   sed('-i', /PDFJSSCRIPT_VERSION/, EXTENSION_VERSION,
@@ -1017,7 +1079,7 @@ target.lint = function() {
                     'test/reporter.js',
                     'test/unit/',
                     'extensions/firefox/',
-                    'extensions/chrome/'
+                    'extensions/chromium/'
                     ];
 
   var jshintPath = path.normalize('./node_modules/.bin/jshint');

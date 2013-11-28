@@ -360,6 +360,7 @@ describe('font', function() {
         '/ExpansionFactor  99\n' +
         '/Subrs 1 array\n' +
         'dup 0 1 RD x noaccess put\n'+
+        'end\n' +
         '/CharStrings 46 dict dup begin\n' +
         '/.notdef 1 RD x ND' + '\n' +
         'end');
@@ -383,7 +384,7 @@ describe('font', function() {
         'dup 33 /arrowright put\n' +
         'readonly def\n');
       var parser = new Type1Parser(stream);
-      var props = {};
+      var props = { overridableEncoding: true };
       var program = parser.extractFontHeader(props);
       expect(props.baseEncoding[33]).toEqual('arrowright');
     });
