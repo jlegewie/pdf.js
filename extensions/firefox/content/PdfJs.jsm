@@ -203,18 +203,7 @@ let PdfJs = {
       return false;
     }
 
-    // Check if we have disabled plugin handling of 'application/pdf' in prefs
-    if (Services.prefs.prefHasUserValue(PREF_DISABLED_PLUGIN_TYPES)) {
-      let disabledPluginTypes =
-        Services.prefs.getCharPref(PREF_DISABLED_PLUGIN_TYPES).split(',');
-      if (disabledPluginTypes.indexOf(PDF_CONTENT_TYPE) >= 0) {
-        return true;
-      }
-    }
-
-    // Check if there is an enabled pdf plugin.
-    // Note: this check is performed last because getPluginTags() triggers costly
-    // plugin list initialization (bug 881575)
+    // we also need to check if pdf plugin is not present or disabled...
     let tags = Cc["@mozilla.org/plugin/host;1"].
                   getService(Ci.nsIPluginHost).
                   getPluginTags();
@@ -224,12 +213,17 @@ let PdfJs = {
       }
       let mimeTypes = tag.getMimeTypes();
       return mimeTypes.some(function(mimeType) {
-        return mimeType === PDF_CONTENT_TYPE;
+        return mimeType.type === PDF_CONTENT_TYPE;
       });
     });
-
-    // Use pdf.js if pdf plugin is not present or disabled
-    return !enabledPluginFound;
+    if (!enabledPluginFound) {
+      return true; // no plugins for this type, it's good
+    }
+    // ... and full page plugins list must have 'application/pdf' type,
+    // in case when enabled pdf plugin exists.
+    return Services.prefs.prefHasUserValue(PREF_DISABLED_PLUGIN_TYPES) ?
+      (Services.prefs.getCharPref(PREF_DISABLED_PLUGIN_TYPES).split(',').
+      indexOf(PDF_CONTENT_TYPE) >= 0) : false;
   },
 
   _ensureRegistered: function _ensureRegistered() {
@@ -254,7 +248,7 @@ let PdfJs = {
     this._pdfStreamConverterFactory.unregister();
     delete this._pdfStreamConverterFactory;
 
-    this._pdfRedirectorFactory.unregister();
+    this._pdfRedirectorFactory.unregister;
     delete this._pdfRedirectorFactory;
     Svc.pluginHost.unregisterPlayPreviewMimeType(PDF_CONTENT_TYPE);
 

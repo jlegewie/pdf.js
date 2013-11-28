@@ -8,7 +8,7 @@
 'use strict';
 
 //
-// Fetch the PDF document from the URL using promises
+// Fetch the PDF document from the URL using promices
 //
 PDFJS.getDocument('helloworld.pdf').then(function(pdf) {
   // Using promise to fetch the page

@@ -16,7 +16,7 @@
  */
 /* jshint esnext:true */
 /* globals Components, Services, XPCOMUtils, NetUtil, PrivateBrowsingUtils,
-           dump, NetworkManager, PdfJsTelemetry, DEFAULT_PREFERENCES */
+           dump, NetworkManager */
 
 'use strict';
 
@@ -33,21 +33,14 @@ const PDF_CONTENT_TYPE = 'application/pdf';
 const PREF_PREFIX = 'PDFJSSCRIPT_PREF_PREFIX';
 const PDF_VIEWER_WEB_PAGE = 'resource://pdf.js/web/viewer.html';
 const MAX_DATABASE_LENGTH = 4096;
-const MAX_STRING_PREF_LENGTH = 4096;
 
 Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 Cu.import('resource://gre/modules/Services.jsm');
 Cu.import('resource://gre/modules/NetUtil.jsm');
 Cu.import('resource://pdf.js/network.js');
 
-// Load the default preferences.
-Cu.import('resource://pdf.js/default_preferences.js');
-
 XPCOMUtils.defineLazyModuleGetter(this, 'PrivateBrowsingUtils',
   'resource://gre/modules/PrivateBrowsingUtils.jsm');
-
-XPCOMUtils.defineLazyModuleGetter(this, 'PdfJsTelemetry',
-  'resource://pdf.js/PdfJsTelemetry.jsm');
 
 var Svc = {};
 XPCOMUtils.defineLazyServiceGetter(Svc, 'mime',
@@ -62,20 +55,12 @@ function getChromeWindow(domWindow) {
   return containingBrowser.ownerDocument.defaultView;
 }
 
-function setBoolPref(pref, value) {
-  Services.prefs.setBoolPref(pref, value);
-}
-
 function getBoolPref(pref, def) {
   try {
     return Services.prefs.getBoolPref(pref);
   } catch (ex) {
     return def;
   }
-}
-
-function setIntPref(pref, value) {
-  Services.prefs.setIntPref(pref, value);
 }
 
 function getIntPref(pref, def) {
@@ -209,17 +194,32 @@ PdfDataListener.prototype = {
 function ChromeActions(domWindow, contentDispositionFilename) {
   this.domWindow = domWindow;
   this.contentDispositionFilename = contentDispositionFilename;
-  this.telemetryState = {
-    documentInfo: false,
-    firstPageInfo: false,
-    streamTypesUsed: [],
-    startAt: Date.now()
-  };
 }
 
 ChromeActions.prototype = {
   isInPrivateBrowsing: function() {
-    return PrivateBrowsingUtils.isWindowPrivate(this.domWindow);
+    var docIsPrivate, privateBrowsing;
+    try {
+      docIsPrivate = PrivateBrowsingUtils.isWindowPrivate(this.domWindow);
+    } catch (x) {
+      // unable to use PrivateBrowsingUtils, e.g. FF15
+    }
+    if (typeof docIsPrivate === 'undefined') {
+      // per-window Private Browsing is not supported, trying global service
+      try {
+        privateBrowsing = Cc['@mozilla.org/privatebrowsing;1']
+                            .getService(Ci.nsIPrivateBrowsingService);
+        docIsPrivate = privateBrowsing.privateBrowsingEnabled;
+      } catch (x) {
+        // unable to get nsIPrivateBrowsingService (e.g. not Firefox)
+        docIsPrivate = false;
+      }
+    }
+    // caching the result
+    this.isInPrivateBrowsing = function isInPrivateBrowsingCached() {
+      return docIsPrivate;
+    };
+    return docIsPrivate;
   },
   download: function(data, sendResponse) {
     var self = this;
@@ -227,10 +227,6 @@ ChromeActions.prototype = {
     // The data may not be downloaded so we need just retry getting the pdf with
     // the original url.
     var originalUri = NetUtil.newURI(data.originalUrl);
-    var filename = data.filename;
-    if (typeof filename !== 'string' || !/\.pdf$/i.test(filename)) {
-      filename = 'document.pdf';
-    }
     var blobUri = data.blobUrl ? NetUtil.newURI(data.blobUrl) : originalUri;
     var extHelperAppSvc =
           Cc['@mozilla.org/uriloader/external-helper-app-service;1'].
@@ -259,9 +255,7 @@ ChromeActions.prototype = {
         // contentDisposition/contentDispositionFilename is readonly before FF18
         channel.contentDisposition = Ci.nsIChannel.DISPOSITION_ATTACHMENT;
         if (self.contentDispositionFilename) {
-          channel.contentDispositionFilename = self.contentDispositionFilename;
-        } else {
-          channel.contentDispositionFilename = filename;
+           channel.contentDispositionFilename = self.contentDispositionFilename;
         }
       } catch (e) {}
       channel.setURI(originalUri);
@@ -342,48 +336,11 @@ ChromeActions.prototype = {
   supportsDocumentColors: function() {
     return getBoolPref('browser.display.use_document_colors', true);
   },
-  reportTelemetry: function (data) {
-    var probeInfo = JSON.parse(data);
-    switch (probeInfo.type) {
-      case 'documentInfo':
-        if (!this.telemetryState.documentInfo) {
-          PdfJsTelemetry.onDocumentVersion(probeInfo.version | 0);
-          PdfJsTelemetry.onDocumentGenerator(probeInfo.generator | 0);
-          if (probeInfo.formType) {
-            PdfJsTelemetry.onForm(probeInfo.formType === 'acroform');
-          }
-          this.telemetryState.documentInfo = true;
-        }
-        break;
-      case 'pageInfo':
-        if (!this.telemetryState.firstPageInfo) {
-          var duration = Date.now() - this.telemetryState.startAt;
-          PdfJsTelemetry.onTimeToView(duration);
-          this.telemetryState.firstPageInfo = true;
-        }
-        break;
-      case 'streamInfo':
-        if (!Array.isArray(probeInfo.streamTypes)) {
-          break;
-        }
-        for (var i = 0; i < probeInfo.streamTypes.length; i++) {
-          var streamTypeId = probeInfo.streamTypes[i] | 0;
-          if (streamTypeId >= 0 && streamTypeId < 10 &&
-              !this.telemetryState.streamTypesUsed[streamTypeId]) {
-            PdfJsTelemetry.onStreamType(streamTypeId);
-            this.telemetryState.streamTypesUsed[streamTypeId] = true;
-          }
-        }
-        break;
-    }
-  },
   fallback: function(url, sendResponse) {
     var self = this;
     var domWindow = this.domWindow;
     var strings = getLocalizedStrings('chrome.properties');
     var message = getLocalizedString(strings, 'unsupported_feature');
-
-    PdfJsTelemetry.onFallback();
 
     var notificationBox = null;
     try {
@@ -417,7 +374,7 @@ ChromeActions.prototype = {
       }
     }];
     notificationBox.appendNotification(message, 'pdfjs-fallback', null,
-                                       notificationBox.PRIORITY_INFO_LOW,
+                                       notificationBox.PRIORITY_WARNING_LOW,
                                        buttons,
                                        function eventsCallback(eventType) {
       // Currently there is only one event "removed" but if there are any other
@@ -443,62 +400,6 @@ ChromeActions.prototype = {
     }
     getChromeWindow(this.domWindow).gFindBar
                                    .updateControlState(result, findPrevious);
-  },
-  setPreferences: function(prefs) {
-    var prefValue, defaultValue, prefName, prefType, defaultType;
-
-    for (var key in DEFAULT_PREFERENCES) {
-      prefValue = prefs[key];
-      defaultValue = DEFAULT_PREFERENCES[key];
-      prefName = (PREF_PREFIX + '.' + key);
-
-      if (prefValue === undefined || prefValue === defaultValue) {
-        Services.prefs.clearUserPref(prefName);
-      } else {
-        prefType = typeof prefValue;
-        defaultType = typeof defaultValue;
-
-        if (prefType !== defaultType) {
-          continue;
-        }
-        switch (defaultType) {
-          case 'boolean':
-            setBoolPref(prefName, prefValue);
-            break;
-          case 'number':
-            setIntPref(prefName, prefValue);
-            break;
-          case 'string':
-            // Protect against adding arbitrarily long strings in about:config.
-            if (prefValue.length <= MAX_STRING_PREF_LENGTH) {
-              setStringPref(prefName, prefValue);
-            }
-            break;
-        }
-      }
-    }
-  },
-  getPreferences: function() {
-    var currentPrefs = {};
-    var defaultValue, prefName;
-
-    for (var key in DEFAULT_PREFERENCES) {
-      defaultValue = DEFAULT_PREFERENCES[key];
-      prefName = (PREF_PREFIX + '.' + key);
-
-      switch (typeof defaultValue) {
-        case 'boolean':
-          currentPrefs[key] = getBoolPref(prefName, defaultValue);
-          break;
-        case 'number':
-          currentPrefs[key] = getIntPref(prefName, defaultValue);
-          break;
-        case 'string':
-          currentPrefs[key] = getStringPref(prefName, defaultValue);
-          break;
-      }
-    }
-    return JSON.stringify(currentPrefs);
   }
 };
 
@@ -507,14 +408,11 @@ var RangedChromeActions = (function RangedChromeActionsClosure() {
    * This is for range requests
    */
   function RangedChromeActions(
-              domWindow, contentDispositionFilename, originalRequest,
-              dataListener) {
+              domWindow, contentDispositionFilename, originalRequest) {
 
     ChromeActions.call(this, domWindow, contentDispositionFilename);
-    this.dataListener = dataListener;
-    this.originalRequest = originalRequest;
 
-    this.pdfUrl = originalRequest.URI.spec;
+    this.pdfUrl = originalRequest.URI.resolve('');
     this.contentLength = originalRequest.contentLength;
 
     // Pass all the headers from the original request through
@@ -558,15 +456,11 @@ var RangedChromeActions = (function RangedChromeActionsClosure() {
   proto.constructor = RangedChromeActions;
 
   proto.initPassiveLoading = function RangedChromeActions_initPassiveLoading() {
-    this.originalRequest.cancel(Cr.NS_BINDING_ABORTED);
-    this.originalRequest = null;
     this.domWindow.postMessage({
       pdfjsLoadAction: 'supportsRangedLoading',
       pdfUrl: this.pdfUrl,
-      length: this.contentLength,
-      data: this.dataListener.getData()
+      length: this.contentLength
     }, '*');
-    this.dataListener = null;
 
     return true;
   };
@@ -584,12 +478,6 @@ var RangedChromeActions = (function RangedChromeActionsClosure() {
           pdfjsLoadAction: 'range',
           begin: args.begin,
           chunk: args.chunk
-        }, '*');
-      },
-      onProgress: function RangedChromeActions_onProgress(evt) {
-        domWindow.postMessage({
-          pdfjsLoadAction: 'rangeProgress',
-          loaded: evt.loaded,
         }, '*');
       }
     });
@@ -767,8 +655,8 @@ PdfStreamConverter.prototype = {
    * 1. asyncConvertData stores the listener
    * 2. onStartRequest creates a new channel, streams the viewer
    * 3. If range requests are supported:
-   *      3.1. Leave the request open until the viewer is ready to switch to
-   *           range requests.
+   *      3.1. Suspends and cancels the request so we can issue range
+   *          requests instead.
    *
    *    If range rquests are not supported:
    *      3.1. Read the stream as it's loaded in onDataAvailable to send
@@ -841,25 +729,19 @@ PdfStreamConverter.prototype = {
     // Change the content type so we don't get stuck in a loop.
     aRequest.setProperty('contentType', aRequest.contentType);
     aRequest.contentType = 'text/html';
-    if (isHttpRequest) {
-      // We trust PDF viewer, using no CSP
-      aRequest.setResponseHeader('Content-Security-Policy', '', false);
-      aRequest.setResponseHeader('Content-Security-Policy-Report-Only', '',
-                                 false);
-      aRequest.setResponseHeader('X-Content-Security-Policy', '', false);
-      aRequest.setResponseHeader('X-Content-Security-Policy-Report-Only', '',
-                                 false);
+
+    if (!rangeRequest) {
+      // Creating storage for PDF data
+      var contentLength = aRequest.contentLength;
+      this.dataListener = new PdfDataListener(contentLength);
+      this.binaryStream = Cc['@mozilla.org/binaryinputstream;1']
+                          .createInstance(Ci.nsIBinaryInputStream);
+    } else {
+      // Suspend the request so we're not consuming any of the stream,
+      // but we can't cancel the request yet. Otherwise, the original
+      // listener will think we do not want to go the new PDF url
+      aRequest.suspend();
     }
-
-    PdfJsTelemetry.onViewerIsUsed();
-    PdfJsTelemetry.onDocumentSize(aRequest.contentLength);
-
-
-    // Creating storage for PDF data
-    var contentLength = aRequest.contentLength;
-    this.dataListener = new PdfDataListener(contentLength);
-    this.binaryStream = Cc['@mozilla.org/binaryinputstream;1']
-                        .createInstance(Ci.nsIBinaryInputStream);
 
     // Create a new channel that is viewer loaded as a resource.
     var ioService = Services.io;
@@ -885,8 +767,12 @@ PdfStreamConverter.prototype = {
         var domWindow = getDOMWindow(channel);
         var actions;
         if (rangeRequest) {
-          actions = new RangedChromeActions(
-              domWindow, contentDispositionFilename, aRequest, dataListener);
+          // We are going to be issuing range requests, so cancel the
+          // original request
+          aRequest.resume();
+          aRequest.cancel(Cr.NS_BINDING_ABORTED);
+          actions = new RangedChromeActions(domWindow,
+              contentDispositionFilename, aRequest);
         } else {
           actions = new StandardChromeActions(
               domWindow, contentDispositionFilename, dataListener);

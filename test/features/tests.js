@@ -276,18 +276,6 @@ var tests = [
     area: 'Core'
   },
   {
-    id: 'atob',
-    name: 'atob() is present',
-    run: function () {
-      if ('atob' in window)
-        return { output: 'Success', emulated: '' };
-      else
-        return { output: 'Failed', emulated: 'Yes' };
-    },
-    impact: 'Critical',
-    area: 'Core'
-  },
-  {
     id: 'Function-bind',
     name: 'Function.prototype.bind is present',
     run: function () {
@@ -374,13 +362,10 @@ var tests = [
       var ctx = canvas.getContext('2d');
       ctx.rect(1, 1, 50, 50);
       ctx.rect(5, 5, 41, 41);
-
-      if ('mozFillRule' in ctx) {
-        ctx.mozFillRule = 'evenodd';
-        ctx.fill();
-      } else {
-        ctx.fill('evenodd');
-      }
+      ['fillRule', 'mozFillRule', 'webkitFillRule'].forEach(function (name) {
+        if (name in ctx) ctx[name] = 'evenodd';
+      });
+      ctx.fill();
 
       var data = ctx.getImageData(0, 0, 50, 50).data;
       var isEvenOddFill = data[20 * 4 + 20 * 200 + 3] == 0 &&
@@ -538,39 +523,6 @@ var tests = [
       }
     },
     impact: 'Important',
-    area: 'Core'
-  },
-  {
-    id: 'Worker-transfers',
-    name: 'Worker can use transfers for postMessage',
-    run: function () {
-      if (typeof Worker == 'undefined')
-        return { output: 'Skipped', emulated: '' };
-
-      try {
-        var worker = new Worker('worker-stub.js');
-
-        var promise = new Promise();
-        var timeout = setTimeout(function () {
-          promise.resolve({ output: 'Failed', emulated: '?' });
-        }, 5000);
-
-        worker.addEventListener('message', function (e) {
-          var data = e.data;
-          if (data.action == 'test-transfers' && data.result)
-            promise.resolve({ output: 'Success', emulated: '' });
-          else
-            promise.resolve({ output: 'Failed', emulated: 'Yes' });
-        }, false);
-        var testObj = new Uint8Array([255]);
-        worker.postMessage({action: 'test-transfers',
-          data: testObj}, [testObj.buffer]);
-        return promise;
-      } catch (e) {
-        return { output: 'Failed', emulated: 'Yes' };
-      }
-    },
-    impact: 'Normal',
     area: 'Core'
   },
   {

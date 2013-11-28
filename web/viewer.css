@@ -20,8 +20,6 @@
 
 html {
   height: 100%;
-  /* Font size is needed to make the activity bar the corect size. */
-  font-size: 10px;
 }
 
 body {
@@ -38,7 +36,7 @@ select {
 }
 
 .hidden {
-  display: none !important;
+  display: none;
 }
 [hidden] {
   display: none !important;
@@ -66,20 +64,6 @@ select {
   cursor: none;
 }
 
-#viewerContainer:-ms-fullscreen {
-  top: 0px !important;
-  border-top: 2px solid transparent;
-  width: 100%;
-  height: 100%;
-  overflow: hidden !important;
-  cursor: none;
-}
-
-#viewerContainer:-ms-fullscreen::-ms-backdrop {
-  background-color: #404040;
-  background-image: url(images/texture.png);
-}
-
 #viewerContainer:fullscreen {
   top: 0px;
   border-top: 2px solid transparent;
@@ -91,16 +75,13 @@ select {
   cursor: none;
 }
 
+
 :-webkit-full-screen .page {
   margin-bottom: 100%;
 }
 
 :-moz-full-screen .page {
   margin-bottom: 100%;
-}
-
-:-ms-fullscreen .page {
-  margin-bottom: 100% !important;
 }
 
 :fullscreen .page {
@@ -115,61 +96,39 @@ select {
   display: none;
 }
 
-:-ms-fullscreen a:not(.internalLink) {
-  display: none !important;
-}
-
 :fullscreen a:not(.internalLink) {
   display: none;
 }
 
-:-webkit-full-screen .textLayer > div {
-  cursor: none;
-}
-
-:-moz-full-screen .textLayer > div {
-  cursor: none;
-}
-
-:fullscreen .textLayer > div {
-  cursor: none;
-}
-
-#viewerContainer.presentationControls,
-#viewerContainer.presentationControls .textLayer > div {
+#viewerContainer.presentationControls {
   cursor: default;
 }
 
 /* outer/inner center provides horizontal center */
-.outerCenter {
-  pointer-events: none;
-  position: relative;
-}
 html[dir='ltr'] .outerCenter {
   float: right;
+  position: relative;
   right: 50%;
 }
 html[dir='rtl'] .outerCenter {
   float: left;
-  left: 50%;
-}
-.innerCenter {
-  pointer-events: auto;
   position: relative;
+  left: 50%;
 }
 html[dir='ltr'] .innerCenter {
   float: right;
+  position: relative;
   right: -50%;
 }
 html[dir='rtl'] .innerCenter {
   float: left;
+  position: relative;
   left: -50%;
 }
 
 #outerContainer {
   width: 100%;
   height: 100%;
-  position: relative;
 }
 
 #sidebarContainer {
@@ -180,17 +139,28 @@ html[dir='rtl'] .innerCenter {
   visibility: hidden;
   -webkit-transition-duration: 200ms;
   -webkit-transition-timing-function: ease;
+  -moz-transition-duration: 200ms;
+  -moz-transition-timing-function: ease;
+  -ms-transition-duration: 200ms;
+  -ms-transition-timing-function: ease;
+  -o-transition-duration: 200ms;
+  -o-transition-timing-function: ease;
   transition-duration: 200ms;
   transition-timing-function: ease;
 
 }
 html[dir='ltr'] #sidebarContainer {
   -webkit-transition-property: left;
+  -moz-transition-property: left;
+  -ms-transition-property: left;
+  -o-transition-property: left;
   transition-property: left;
   left: -200px;
 }
 html[dir='rtl'] #sidebarContainer {
   -webkit-transition-property: right;
+  -ms-transition-property: right;
+  -o-transition-property: right;
   transition-property: right;
   right: -200px;
 }
@@ -215,16 +185,28 @@ html[dir='rtl'] #outerContainer.sidebarOpen > #sidebarContainer {
   min-width: 320px;
   -webkit-transition-duration: 200ms;
   -webkit-transition-timing-function: ease;
+  -moz-transition-duration: 200ms;
+  -moz-transition-timing-function: ease;
+  -ms-transition-duration: 200ms;
+  -ms-transition-timing-function: ease;
+  -o-transition-duration: 200ms;
+  -o-transition-timing-function: ease;
   transition-duration: 200ms;
   transition-timing-function: ease;
 }
 html[dir='ltr'] #outerContainer.sidebarOpen > #mainContainer {
   -webkit-transition-property: left;
+  -moz-transition-property: left;
+  -ms-transition-property: left;
+  -o-transition-property: left;
   transition-property: left;
   left: 200px;
 }
 html[dir='rtl'] #outerContainer.sidebarOpen > #mainContainer {
   -webkit-transition-property: right;
+  -moz-transition-property: right;
+  -ms-transition-property: right;
+  -o-transition-property: right;
   transition-property: right;
   right: 200px;
 }
@@ -254,7 +236,9 @@ html[dir='rtl'] #sidebarContent {
   right: 0;
   bottom: 0;
   left: 0;
-  outline: none;
+}
+.loadingInProgress #viewerContainer {
+  top: 39px;
 }
 
 .toolbar {
@@ -272,7 +256,14 @@ html[dir='rtl'] #sidebarContent {
 #toolbarSidebar {
   width: 200px;
   height: 32px;
-  background-color: #424242; /* fallback */
+  background-image: url(images/texture.png),
+                    -webkit-linear-gradient(hsla(0,0%,30%,.99), hsla(0,0%,25%,.95));
+  background-image: url(images/texture.png),
+                    -moz-linear-gradient(hsla(0,0%,30%,.99), hsla(0,0%,25%,.95));
+  background-image: url(images/texture.png),
+                    -ms-linear-gradient(hsla(0,0%,30%,.99), hsla(0,0%,25%,.95));
+  background-image: url(images/texture.png),
+                    -o-linear-gradient(hsla(0,0%,30%,.99), hsla(0,0%,25%,.95));
   background-image: url(images/texture.png),
                     linear-gradient(hsla(0,0%,30%,.99), hsla(0,0%,25%,.95));
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25),
@@ -282,10 +273,17 @@ html[dir='rtl'] #sidebarContent {
               0 0 1px hsla(0,0%,0%,.1);
 }
 
-#toolbarContainer, .findbar, .secondaryToolbar {
+#toolbarContainer, .findbar {
   position: relative;
-  height: 32px;
-  background-color: #474747; /* fallback */
+  background-color: #474747; /* IE9 */
+  background-image: url(images/texture.png),
+                    -webkit-linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
+  background-image: url(images/texture.png),
+                    -moz-linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
+  background-image: url(images/texture.png),
+                    -ms-linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
+  background-image: url(images/texture.png),
+                    -o-linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
   background-image: url(images/texture.png),
                     linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
   box-shadow: inset 1px 0 0 hsla(0,0%,100%,.08),
@@ -315,8 +313,22 @@ html[dir='rtl'] #sidebarContent {
   height: 100%;
   background-color: #ddd;
   overflow: hidden;
+  -moz-transition: width 200ms;
+  -ms-transition: width 200ms;
   -webkit-transition: width 200ms;
   transition: width 200ms;
+}
+
+@-moz-keyframes progressIndeterminate {
+  0% { left: 0%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+@-ms-keyframes progressIndeterminate {
+  0% { left: 0%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
 }
 
 @-webkit-keyframes progressIndeterminate {
@@ -333,6 +345,8 @@ html[dir='rtl'] #sidebarContent {
 
 #loadingBar .progress.indeterminate {
   background-color: #999;
+  -moz-transition: none;
+  -ms-transition: none;
   -webkit-transition: none;
   transition: none;
 }
@@ -344,15 +358,19 @@ html[dir='rtl'] #sidebarContent {
   height: 100%;
   width: 50px;
 
-  background-image: linear-gradient(to right, #999 0%, #fff 50%, #999 100%);
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
+  background-image: -moz-linear-gradient(left, #999 0%, #fff 50%, #999 100%);
+  background-image: -ms-linear-gradient(left, #999 0%, #fff 50%, #999 100%);
+  background-image: -webkit-linear-gradient(left, #999 0%, #fff 50%, #999 100%);
+  background-image: linear-gradient(left, #999 0%, #fff 50%, #999 100%);
+  background-size: 100% 100% no-repeat;
 
+  -moz-animation: progressIndeterminate 2s linear infinite;
+  -ms-animation: progressIndeterminate 2s linear infinite;
   -webkit-animation: progressIndeterminate 2s linear infinite;
   animation: progressIndeterminate 2s linear infinite;
 }
 
-.findbar, .secondaryToolbar {
+.findbar {
   top: 32px;
   position: absolute;
   z-index: 10000;
@@ -387,33 +405,12 @@ html[dir='rtl'] .findbar {
   background-position: right;
 }
 
-.secondaryToolbar {
-  padding: 6px;
-  height: auto;
-  z-index: 30000;
-}
-html[dir='ltr'] .secondaryToolbar {
-  right: 4px;
-}
-html[dir='rtl'] .secondaryToolbar {
-  left: 4px;
-}
-
-#secondaryToolbarButtonContainer {
-  max-width: 200px;
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: -4px;
-}
-
-.doorHanger,
-.doorHangerRight {
+.doorHanger {
   border: 1px solid hsla(0,0%,0%,.5);
   border-radius: 2px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
-.doorHanger:after, .doorHanger:before,
-.doorHangerRight:after, .doorHangerRight:before {
+.doorHanger:after, .doorHanger:before {
   bottom: 100%;
   border: solid transparent;
   content: " ";
@@ -422,37 +419,31 @@ html[dir='rtl'] .secondaryToolbar {
   position: absolute;
   pointer-events: none;
 }
-.doorHanger:after,
-.doorHangerRight:after {
+.doorHanger:after {
   border-bottom-color: hsla(0,0%,32%,.99);
   border-width: 8px;
 }
-.doorHanger:before,
-.doorHangerRight:before {
+.doorHanger:before {
   border-bottom-color: hsla(0,0%,0%,.5);
   border-width: 9px;
 }
 
-html[dir='ltr'] .doorHanger:after,
-html[dir='rtl'] .doorHangerRight:after {
+html[dir='ltr'] .doorHanger:after {
   left: 13px;
   margin-left: -8px;
 }
 
-html[dir='ltr'] .doorHanger:before,
-html[dir='rtl'] .doorHangerRight:before {
+html[dir='ltr'] .doorHanger:before {
   left: 13px;
   margin-left: -9px;
 }
 
-html[dir='rtl'] .doorHanger:after,
-html[dir='ltr'] .doorHangerRight:after {
+html[dir='rtl'] .doorHanger:after {
   right: 13px;
   margin-right: -8px;
 }
 
-html[dir='rtl'] .doorHanger:before,
-html[dir='ltr'] .doorHangerRight:before {
+html[dir='rtl'] .doorHanger:before {
   right: 13px;
   margin-right: -9px;
 }
@@ -470,8 +461,9 @@ html[dir='ltr'] #toolbarViewerLeft {
   margin-left: -1px;
 }
 html[dir='rtl'] #toolbarViewerRight {
-  margin-right: -1px;
+  margin-left: -1px;
 }
+
 
 html[dir='ltr'] #toolbarViewerLeft,
 html[dir='rtl'] #toolbarViewerRight {
@@ -517,8 +509,7 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton {
   float: right;
 }
 
-.toolbarButton,
-.secondaryToolbarButton {
+.toolbarButton {
   border: 0 none;
   background-color: rgba(0, 0, 0, 0);
   width: 32px;
@@ -532,8 +523,7 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton {
   overflow: hidden;
 }
 
-.toolbarButton[disabled],
-.secondaryToolbarButton[disabled] {
+.toolbarButton[disabled] {
   opacity: .5;
 }
 
@@ -550,6 +540,10 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton {
 .splitToolbarButton.toggled > .toolbarButton,
 .toolbarButton.textButton {
   background-color: hsla(0,0%,0%,.12);
+  background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   border: 1px solid hsla(0,0%,0%,.35);
@@ -560,6 +554,15 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton {
   -webkit-transition-property: background-color, border-color, box-shadow;
   -webkit-transition-duration: 150ms;
   -webkit-transition-timing-function: ease;
+  -moz-transition-property: background-color, border-color, box-shadow;
+  -moz-transition-duration: 150ms;
+  -moz-transition-timing-function: ease;
+  -ms-transition-property: background-color, border-color, box-shadow;
+  -ms-transition-duration: 150ms;
+  -ms-transition-timing-function: ease;
+  -o-transition-property: background-color, border-color, box-shadow;
+  -o-transition-duration: 150ms;
+  -o-transition-timing-function: ease;
   transition-property: background-color, border-color, box-shadow;
   transition-duration: 150ms;
   transition-timing-function: ease;
@@ -568,7 +571,6 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton {
 .splitToolbarButton > .toolbarButton:hover,
 .splitToolbarButton > .toolbarButton:focus,
 .dropdownToolbarButton:hover,
-.promptButton:hover,
 .toolbarButton.textButton:hover,
 .toolbarButton.textButton:focus {
   background-color: hsla(0,0%,0%,.2);
@@ -598,7 +600,7 @@ html[dir='rtl'] .splitToolbarButton > .toolbarButton:first-child {
 .splitToolbarButtonSeparator {
   padding: 8px 0;
   width: 1px;
-  background-color: hsla(0,0%,0%,.5);
+  background-color: hsla(0,0%,00%,.5);
   z-index: 99;
   box-shadow: 0 0 0 1px hsla(0,0%,100%,.08);
   display: inline-block;
@@ -618,20 +620,27 @@ html[dir='rtl'] .splitToolbarButtonSeparator {
   -webkit-transition-property: padding;
   -webkit-transition-duration: 10ms;
   -webkit-transition-timing-function: ease;
+  -moz-transition-property: padding;
+  -moz-transition-duration: 10ms;
+  -moz-transition-timing-function: ease;
+  -ms-transition-property: padding;
+  -ms-transition-duration: 10ms;
+  -ms-transition-timing-function: ease;
+  -o-transition-property: padding;
+  -o-transition-duration: 10ms;
+  -o-transition-timing-function: ease;
   transition-property: padding;
   transition-duration: 10ms;
   transition-timing-function: ease;
 }
 
 .toolbarButton,
-.dropdownToolbarButton,
-.promptButton,
-.secondaryToolbarButton {
+.dropdownToolbarButton {
   min-width: 16px;
   padding: 2px 6px 0;
   border: 1px solid transparent;
   border-radius: 2px;
-  color: hsla(0,0%,100%,.8);
+  color: hsl(0,0%,95%);
   font-size: 12px;
   line-height: 14px;
   -webkit-user-select: none;
@@ -642,29 +651,37 @@ html[dir='rtl'] .splitToolbarButtonSeparator {
   -webkit-transition-property: background-color, border-color, box-shadow;
   -webkit-transition-duration: 150ms;
   -webkit-transition-timing-function: ease;
+  -moz-transition-property: background-color, border-color, box-shadow;
+  -moz-transition-duration: 150ms;
+  -moz-transition-timing-function: ease;
+  -ms-transition-property: background-color, border-color, box-shadow;
+  -ms-transition-duration: 150ms;
+  -ms-transition-timing-function: ease;
+  -o-transition-property: background-color, border-color, box-shadow;
+  -o-transition-duration: 150ms;
+  -o-transition-timing-function: ease;
   transition-property: background-color, border-color, box-shadow;
   transition-duration: 150ms;
   transition-timing-function: ease;
 }
 
 html[dir='ltr'] .toolbarButton,
-html[dir='ltr'] .promptButton,
 html[dir='ltr'] .dropdownToolbarButton {
   margin: 3px 2px 4px 0;
 }
 html[dir='rtl'] .toolbarButton,
-html[dir='rtl'] .promptButton,
 html[dir='rtl'] .dropdownToolbarButton {
   margin: 3px 0 4px 2px;
 }
 
 .toolbarButton:hover,
 .toolbarButton:focus,
-.dropdownToolbarButton,
-.promptButton,
-.secondaryToolbarButton:hover,
-.secondaryToolbarButton:focus {
+.dropdownToolbarButton {
   background-color: hsla(0,0%,0%,.12);
+  background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   border: 1px solid hsla(0,0%,0%,.35);
@@ -675,10 +692,12 @@ html[dir='rtl'] .dropdownToolbarButton {
 }
 
 .toolbarButton:hover:active,
-.promptButton:hover:active,
-.dropdownToolbarButton:hover:active,
-.secondaryToolbarButton:hover:active {
+.dropdownToolbarButton:hover:active {
   background-color: hsla(0,0%,0%,.2);
+  background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   border-color: hsla(0,0%,0%,.35) hsla(0,0%,0%,.4) hsla(0,0%,0%,.45);
   box-shadow: 0 1px 1px hsla(0,0%,0%,.1) inset,
@@ -687,15 +706,27 @@ html[dir='rtl'] .dropdownToolbarButton {
   -webkit-transition-property: background-color, border-color, box-shadow;
   -webkit-transition-duration: 10ms;
   -webkit-transition-timing-function: linear;
+  -moz-transition-property: background-color, border-color, box-shadow;
+  -moz-transition-duration: 10ms;
+  -moz-transition-timing-function: linear;
+  -ms-transition-property: background-color, border-color, box-shadow;
+  -ms-transition-duration: 10ms;
+  -ms-transition-timing-function: linear;
+  -o-transition-property: background-color, border-color, box-shadow;
+  -o-transition-duration: 10ms;
+  -o-transition-timing-function: linear;
   transition-property: background-color, border-color, box-shadow;
   transition-duration: 10ms;
   transition-timing-function: linear;
 }
 
 .toolbarButton.toggled,
-.splitToolbarButton.toggled > .toolbarButton.toggled,
-.secondaryToolbarButton.toggled {
+.splitToolbarButton.toggled > .toolbarButton.toggled {
   background-color: hsla(0,0%,0%,.3);
+  background-image: -webkit-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -ms-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -o-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   border-color: hsla(0,0%,0%,.4) hsla(0,0%,0%,.45) hsla(0,0%,0%,.5);
   box-shadow: 0 1px 1px hsla(0,0%,0%,.1) inset,
@@ -704,14 +735,22 @@ html[dir='rtl'] .dropdownToolbarButton {
   -webkit-transition-property: background-color, border-color, box-shadow;
   -webkit-transition-duration: 10ms;
   -webkit-transition-timing-function: linear;
+  -moz-transition-property: background-color, border-color, box-shadow;
+  -moz-transition-duration: 10ms;
+  -moz-transition-timing-function: linear;
+  -ms-transition-property: background-color, border-color, box-shadow;
+  -ms-transition-duration: 10ms;
+  -ms-transition-timing-function: linear;
+  -o-transition-property: background-color, border-color, box-shadow;
+  -o-transition-duration: 10ms;
+  -o-transition-timing-function: linear;
   transition-property: background-color, border-color, box-shadow;
   transition-duration: 10ms;
   transition-timing-function: linear;
 }
 
 .toolbarButton.toggled:hover:active,
-.splitToolbarButton.toggled > .toolbarButton.toggled:hover:active,
-.secondaryToolbarButton.toggled:hover:active {
+.splitToolbarButton.toggled > .toolbarButton.toggled:hover:active {
   background-color: hsla(0,0%,0%,.4);
   border-color: hsla(0,0%,0%,.4) hsla(0,0%,0%,.5) hsla(0,0%,0%,.55);
   box-shadow: 0 1px 1px hsla(0,0%,0%,.2) inset,
@@ -749,12 +788,6 @@ html[dir='rtl'] .dropdownToolbarButton {
   background: hsl(0,0%,24%);
 }
 
-.promptButton {
-  margin: 3px 2px 4px 5px !important;
-  line-height: 16px;
-  padding: 2px 6px 3px 6px;
-}
-
 #customScaleOption {
   display: none;
 }
@@ -788,6 +821,11 @@ html[dir='rtl'] .toolbarButton:first-child {
   min-width: 30px;
 }
 
+.toolbarButton#sidebarToggle::before {
+  display: inline-block;
+  content: url(images/toolbarButton-sidebarToggle.png);
+}
+
 html[dir='ltr'] #findPrevious {
   margin-left: 3px;
 }
@@ -801,211 +839,118 @@ html[dir='rtl'] #findPrevious {
 html[dir='rtl'] #findNext {
   margin-left: 3px;
 }
-
-.toolbarButton::before,
-.secondaryToolbarButton::before {
+.toolbarButton::before {
   /* All matching images have a size of 16x16
    * (except for the print button: 18x16)
    * All relevant containers have a size of 32x25 */
   position: absolute;
-  display: inline-block;
   top: 4px;
   left: 7px;
 }
 
-html[dir="ltr"] .secondaryToolbarButton::before {
-  left: 4px;
-}
-html[dir="rtl"] .secondaryToolbarButton::before {
-  right: 4px;
-}
-
-html[dir='ltr'] .toolbarButton#sidebarToggle::before {
-  content: url(images/toolbarButton-sidebarToggle.png);
-}
-html[dir='rtl'] .toolbarButton#sidebarToggle::before {
-  content: url(images/toolbarButton-sidebarToggle-rtl.png);
-}
-
-html[dir='ltr'] .toolbarButton#secondaryToolbarToggle::before {
-  content: url(images/toolbarButton-secondaryToolbarToggle.png);
-}
-html[dir='rtl'] .toolbarButton#secondaryToolbarToggle::before {
-  content: url(images/toolbarButton-secondaryToolbarToggle-rtl.png);
-}
-
 html[dir='ltr'] .toolbarButton.findPrevious::before {
+  display: inline-block;
   content: url(images/findbarButton-previous.png);
 }
+
 html[dir='rtl'] .toolbarButton.findPrevious::before {
+  display: inline-block;
   content: url(images/findbarButton-previous-rtl.png);
 }
 
 html[dir='ltr'] .toolbarButton.findNext::before {
+  display: inline-block;
   content: url(images/findbarButton-next.png);
 }
+
 html[dir='rtl'] .toolbarButton.findNext::before {
+  display: inline-block;
   content: url(images/findbarButton-next-rtl.png);
 }
 
 html[dir='ltr'] .toolbarButton.pageUp::before {
+  display: inline-block;
   content: url(images/toolbarButton-pageUp.png);
 }
+
 html[dir='rtl'] .toolbarButton.pageUp::before {
+  display: inline-block;
   content: url(images/toolbarButton-pageUp-rtl.png);
 }
 
 html[dir='ltr'] .toolbarButton.pageDown::before {
+  display: inline-block;
   content: url(images/toolbarButton-pageDown.png);
 }
+
 html[dir='rtl'] .toolbarButton.pageDown::before {
+  display: inline-block;
   content: url(images/toolbarButton-pageDown-rtl.png);
 }
 
 .toolbarButton.zoomOut::before {
+  display: inline-block;
   content: url(images/toolbarButton-zoomOut.png);
 }
 
 .toolbarButton.zoomIn::before {
+  display: inline-block;
   content: url(images/toolbarButton-zoomIn.png);
 }
 
-.toolbarButton.presentationMode::before,
-.secondaryToolbarButton.presentationMode::before {
-  content: url(images/toolbarButton-presentationMode.png);
+.toolbarButton.fullscreen::before {
+  display: inline-block;
+  content: url(images/toolbarButton-fullscreen.png);
 }
 
-.toolbarButton.print::before,
-.secondaryToolbarButton.print::before {
+.toolbarButton.print::before {
+  display: inline-block;
   content: url(images/toolbarButton-print.png);
   left: 6px;
 }
 
-html[dir="ltr"] .secondaryToolbarButton.print::before {
-  left: 3px;
-}
-html[dir="rtl"] .secondaryToolbarButton.print::before {
-  right: 3px;
-}
-
-.toolbarButton.openFile::before,
-.secondaryToolbarButton.openFile::before {
+.toolbarButton.openFile::before {
+  display: inline-block;
   content: url(images/toolbarButton-openFile.png);
 }
 
-.toolbarButton.download::before,
-.secondaryToolbarButton.download::before {
+.toolbarButton.download::before {
+  display: inline-block;
   content: url(images/toolbarButton-download.png);
 }
 
-.toolbarButton.bookmark,
-.secondaryToolbarButton.bookmark {
+.toolbarButton.bookmark {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
+  margin-top: 3px;
   padding-top: 4px;
-  text-decoration: none;
-}
-.secondaryToolbarButton.bookmark {
-  padding-top: 5px;
 }
 
-.bookmark[href='#'] {
+#viewBookmark[href='#'] {
   opacity: .5;
   pointer-events: none;
 }
 
-.toolbarButton.bookmark::before,
-.secondaryToolbarButton.bookmark::before {
+.toolbarButton.bookmark::before {
   content: url(images/toolbarButton-bookmark.png);
 }
 
 #viewThumbnail.toolbarButton::before {
+  display: inline-block;
   content: url(images/toolbarButton-viewThumbnail.png);
 }
 
-html[dir="ltr"] #viewOutline.toolbarButton::before {
+#viewOutline.toolbarButton::before {
+  display: inline-block;
   content: url(images/toolbarButton-viewOutline.png);
-}
-html[dir="rtl"] #viewOutline.toolbarButton::before {
-  content: url(images/toolbarButton-viewOutline-rtl.png);
 }
 
 #viewFind.toolbarButton::before {
+  display: inline-block;
   content: url(images/toolbarButton-search.png);
 }
 
-.secondaryToolbarButton {
-  position: relative;
-  margin: 0 0 4px 0;
-  padding: 3px 0 1px 0;
-  height: auto;
-  min-height: 25px;
-  width: auto;
-  min-width: 100%;
-  white-space: normal;
-}
-html[dir="ltr"] .secondaryToolbarButton {
-  padding-left: 24px;
-  text-align: left;
-}
-html[dir="rtl"] .secondaryToolbarButton {
-  padding-right: 24px;
-  text-align: right;
-}
-html[dir="ltr"] .secondaryToolbarButton.bookmark {
-  padding-left: 27px;
-}
-html[dir="rtl"] .secondaryToolbarButton.bookmark {
-  padding-right: 27px;
-}
-
-html[dir="ltr"] .secondaryToolbarButton > span {
-  padding-right: 4px;
-}
-html[dir="rtl"] .secondaryToolbarButton > span {
-  padding-left: 4px;
-}
-
-.secondaryToolbarButton.firstPage::before {
-  content: url(images/secondaryToolbarButton-firstPage.png);
-}
-
-.secondaryToolbarButton.lastPage::before {
-  content: url(images/secondaryToolbarButton-lastPage.png);
-}
-
-.secondaryToolbarButton.rotateCcw::before {
-  content: url(images/secondaryToolbarButton-rotateCcw.png);
-}
-
-.secondaryToolbarButton.rotateCw::before {
-  content: url(images/secondaryToolbarButton-rotateCw.png);
-}
-
-.verticalToolbarSeparator {
-  display: block;
-  padding: 8px 0;
-  margin: 8px 4px;
-  width: 1px;
-  background-color: hsla(0,0%,0%,.5);
-  box-shadow: 0 0 0 1px hsla(0,0%,100%,.08);
-}
-html[dir='ltr'] .verticalToolbarSeparator {
-  margin-left: 2px;
-}
-html[dir='rtl'] .verticalToolbarSeparator {
-  margin-right: 2px;
-}
-
-.horizontalToolbarSeparator {
-  display: block; 
-  margin: 0 0 4px 0;
-  height: 1px;
-  width: 100%;
-  background-color: hsla(0,0%,0%,.5);
-  box-shadow: 0 0 0 1px hsla(0,0%,100%,.08);
-}
 
 .toolbarField {
   padding: 3px 6px;
@@ -1013,7 +958,7 @@ html[dir='rtl'] .verticalToolbarSeparator {
   border: 1px solid transparent;
   border-radius: 2px;
   background-color: hsla(0,0%,100%,.09);
-  background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   border: 1px solid hsla(0,0%,0%,.35);
   border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
@@ -1023,9 +968,9 @@ html[dir='rtl'] .verticalToolbarSeparator {
   font-size: 12px;
   line-height: 14px;
   outline-style: none;
-  transition-property: background-color, border-color, box-shadow;
-  transition-duration: 150ms;
-  transition-timing-function: ease;
+  -moz-transition-property: background-color, border-color, box-shadow;
+  -moz-transition-duration: 150ms;
+  -moz-transition-timing-function: ease;
 }
 
 .toolbarField[type=checkbox] {
@@ -1081,11 +1026,6 @@ html[dir='rtl'] .verticalToolbarSeparator {
 
 .thumbnail {
   float: left;
-  margin-bottom: 5px;
-}
-
-#thumbnailView > a:last-of-type > .thumbnail {
-  margin-bottom: 10px;
 }
 
 .thumbnail:not([data-loaded]) {
@@ -1094,7 +1034,7 @@ html[dir='rtl'] .verticalToolbarSeparator {
 }
 
 .thumbnailImage {
-  transition-duration: 150ms;
+  -moz-transition-duration: 150ms;
   border: 1px solid transparent;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
   opacity: 0.8;
@@ -1104,7 +1044,7 @@ html[dir='rtl'] .verticalToolbarSeparator {
 .thumbnailSelectionRing {
   border-radius: 2px;
   padding: 7px;
-  transition-duration: 150ms;
+  -moz-transition-duration: 150ms;
 }
 
 a:focus > .thumbnail > .thumbnailSelectionRing > .thumbnailImage,
@@ -1115,7 +1055,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing > .thumbnailImage,
 a:focus > .thumbnail > .thumbnailSelectionRing,
 .thumbnail:hover > .thumbnailSelectionRing {
   background-color: hsla(0,0%,100%,.15);
-  background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
               0 0 1px hsla(0,0%,100%,.2) inset,
@@ -1130,7 +1070,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
 
 .thumbnail.selected > .thumbnailSelectionRing {
   background-color: hsla(0,0%,100%,.3);
-  background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
               0 0 1px hsla(0,0%,100%,.1) inset,
@@ -1181,7 +1121,7 @@ html[dir='rtl'] .outlineItem > a {
 
 .outlineItem > a:hover {
   background-color: hsla(0,0%,100%,.02);
-  background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
               0 0 1px hsla(0,0%,100%,.2) inset,
@@ -1191,7 +1131,7 @@ html[dir='rtl'] .outlineItem > a {
 
 .outlineItem.selected {
   background-color: hsla(0,0%,100%,.08);
-  background-image: linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(hsla(0,0%,100%,.05), hsla(0,0%,100%,0));
   background-clip: padding-box;
   box-shadow: 0 1px 0 hsla(0,0%,100%,.05) inset,
               0 0 1px hsla(0,0%,100%,.1) inset,
@@ -1222,12 +1162,8 @@ html[dir='rtl'] .outlineItem > a {
   bottom: 35px;
 }
 
-.canvasWrapper {
-  overflow: hidden;
-}
-
 canvas {
-  margin: 0;
+  margin: auto;
   display: block;
 }
 
@@ -1244,14 +1180,12 @@ canvas {
   background-color: white;
 }
 
-.page > a,
-.annotationLayer > a {
+.page > a {
   display: block;
   position: absolute;
 }
 
-.page > a:hover,
-.annotationLayer > a:hover {
+.page > a:hover {
   opacity: 0.2;
   background: #ff0;
   box-shadow: 0px 2px 10px #ff0;
@@ -1332,6 +1266,7 @@ canvas {
 }
 
 .annotText > img:hover {
+  cursor: pointer;
   opacity: 1;
 }
 
@@ -1351,9 +1286,6 @@ canvas {
   padding: 3px;
   font-size: 0.8em;
 }
-.loadingInProgress #errorWrapper {
-  top: 39px;
-}
 
 #errorMessageLeft {
   float: left;
@@ -1369,60 +1301,6 @@ canvas {
   padding: 3px;
   margin: 3px;
   width: 98%;
-}
-
-#overlayContainer {
-  display: table;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: hsla(0,0%,0%,.2);
-  z-index: 10000;
-}
-
-#promptContainer {
-  display: table-cell;
-  vertical-align: middle;
-  text-align: center;
-}
-
-#promptContainer > * {
-  display: inline-block;
-}
-
-.prompt {
-  display: table;
-  padding: 15px;
-  border-spacing: 4px;
-  color: hsl(0,0%,85%);
-  line-height: 14px;
-  text-align: center;
-  background-color: #474747; /* fallback */
-  background-image: url(images/texture.png),
-                    linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
-  box-shadow: inset 1px 0 0 hsla(0,0%,100%,.08),
-              inset 0 1px 1px hsla(0,0%,0%,.15),
-              inset 0 -1px 0 hsla(0,0%,100%,.05),
-              0 1px 0 hsla(0,0%,0%,.15),
-              0 1px 1px hsla(0,0%,0%,.1);
-}
-
-.prompt > .row {
-  display: table-row;
-}
-
-.prompt > .row > * {
-  display: table-cell;
-}
-
-.prompt .toolbarField {
-  margin: 5px 0;
-  width: 200px;
-}
-
-.prompt .toolbarField:hover,
-.prompt .toolbarField:focus {
-  border-color: hsla(0,0%,0%,.32) hsla(0,0%,0%,.38) hsla(0,0%,0%,.42);
 }
 
 .clearBoth {
@@ -1503,17 +1381,9 @@ canvas {
 }
 
 @media print {
-  /* General rules for printing. */
-  body {
-    background: transparent none;
-  }
-
   /* Rules for browsers that don't support mozPrintCallback. */
-  #sidebarContainer, #secondaryToolbar, .toolbar, #loadingBox, #errorWrapper, .textLayer {
+  #sidebarContainer, .toolbar, #loadingBox, #errorWrapper, .textLayer {
     display: none;
-  }
-  #viewerContainer {
-    overflow: visible;
   }
 
   #mainContainer, #viewerContainer, .page, .page canvas {
@@ -1525,16 +1395,11 @@ canvas {
   .page {
     float: left;
     display: none;
-    border: none;
     box-shadow: none;
   }
 
   .page[data-loaded] {
     display: block;
-  }
-
-  .fileInput {
-    display: none;
   }
 
   /* Rules for browsers that support mozPrintCallback */
@@ -1551,40 +1416,16 @@ canvas {
   }
 }
 
-.visibleLargeView,
-.visibleMediumView,
-.visibleSmallView {
-  display: none;
-}
-
-@media all and (max-width: 960px) {
+@media all and (max-width: 950px) {
   html[dir='ltr'] #outerContainer.sidebarMoving .outerCenter,
   html[dir='ltr'] #outerContainer.sidebarOpen .outerCenter {
     float: left;
-    left: 205px;
+    left: 180px;
   }
   html[dir='rtl'] #outerContainer.sidebarMoving .outerCenter,
   html[dir='rtl'] #outerContainer.sidebarOpen .outerCenter {
     float: right;
-    right: 205px;
-  }
-}
-
-@media all and (max-width: 900px) {
-  .sidebarOpen .hiddenLargeView {
-    display: none;
-  }
-  .sidebarOpen .visibleLargeView {
-    display: inherit;
-  }
-}
-
-@media all and (max-width: 860px) {
-  .sidebarOpen .hiddenMediumView {
-    display: none;
-  }
-  .sidebarOpen .visibleMediumView {
-    display: inherit;
+    right: 180px;
   }
 }
 
@@ -1610,38 +1451,11 @@ canvas {
 
   html[dir='ltr'] .outerCenter {
     float: left;
-    left: 205px;
+    left: 180px;
   }
   html[dir='rtl'] .outerCenter {
     float: right;
-    right: 205px;
-  }
-
-  #outerContainer .hiddenLargeView,
-  #outerContainer .hiddenMediumView {
-    display: inherit;
-  }
-  #outerContainer .visibleLargeView,
-  #outerContainer .visibleMediumView {
-    display: none;
-  }
-}
-
-@media all and (max-width: 700px) {
-  #outerContainer .hiddenLargeView {
-    display: none;
-  }
-  #outerContainer .visibleLargeView {
-    display: inherit;
-  }
-}
-
-@media all and (max-width: 660px) {
-  #outerContainer .hiddenMediumView {
-    display: none;
-  }
-  #outerContainer .visibleMediumView {
-    display: inherit;
+    right: 180px;
   }
 }
 
@@ -1649,17 +1463,10 @@ canvas {
   .hiddenSmallView {
     display: none;
   }
-  .visibleSmallView {
-    display: inherit;
-  }
-  html[dir='ltr'] #outerContainer.sidebarMoving .outerCenter,
-  html[dir='ltr'] #outerContainer.sidebarOpen .outerCenter,
   html[dir='ltr'] .outerCenter {
     left: 156px;
   }
-  html[dir='rtl'] #outerContainer.sidebarMoving .outerCenter,
-  html[dir='rtl'] #outerContainer.sidebarOpen .outerCenter,
-  html[dir='rtl'] .outerCenter {
+  html[dir='rtr'] .outerCenter {
     right: 156px;
   }
   .toolbarButtonSpacer {
@@ -1667,7 +1474,7 @@ canvas {
   }
 }
 
-@media all and (max-width: 510px) {
+@media all and (max-width: 500px) {
   #scaleSelectContainer, #pageNumberLabel {
     display: none;
   }
