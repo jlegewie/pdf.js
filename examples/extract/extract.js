@@ -40,7 +40,7 @@ PDFJS.getDocument('/examples/extract/pdf/test.pdf').then(function(pdf) {
       // get annotations
       var annotations;
       page.getAnnotations().then(function extractAnno(annos) {
-        // console.log('Page: '+page.pageNumber + " ("+annos.length+" annotations [" + JSON.stringify(annos.map(function(a) {return a.type;})) + "])");
+        console.log('Page: '+page.pageNumber + " ("+annos.length+" annotations [" + JSON.stringify(annos.map(function(a) {return a.type;})) + "])");
         // filter for supported annotations
         annotations = annos.filter(function(anno) {return SUPPORTED_ANNOTS.indexOf(anno.type) >= 0;});
         // skip page if there is nothing interesting
@@ -50,7 +50,7 @@ PDFJS.getDocument('/examples/extract/pdf/test.pdf').then(function(pdf) {
         }
         // render page
         page.render(renderContext).then(function() {
-          // console.log('Page: '+page.pageNumber + " (page rendered)");
+          console.log('Page: '+page.pageNumber + " (page rendered)");
           // show annotations
           // console.log(annos.map(function(anno) {return anno;}));
           var markup = annotations
