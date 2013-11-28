@@ -443,7 +443,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       if (this.ctx.mozCurrentTransform) {
         this.ctx.user2dev = this.ctx.mozCurrentTransform.slice(0, 6);
       } else {
-        this.ctx.user2dev = IDENTITY_MATRIX;        
+        this.ctx.user2dev = IDENTITY_MATRIX;
       }
 
       if (this.textLayer) {
@@ -955,7 +955,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var sw = Util.applyTransform([spaceWidth,0], font2dev);
       // TODO: why 2.0? I changed it to 3
       // dims.spaceWidth = (sw[0] - font2dev[4]) / 2.0;
-      dims.spaceWidth = (sw[0] - font2dev[4]) / 3.0;      
+      dims.spaceWidth = (sw[0] - font2dev[4]) / 3.0;
       return dims;
     },
     /** Determines if character, with the given dimensions, falls within the
@@ -976,9 +976,9 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           var maxY = Math.max(qxy0[1], qxy1[1]);
           // only grab characters where 50% of the character's
           // width lies within the annotation
-          var xPlusHalfWidth = cdims.x + (0.5 * cdims.width);          
+          var xPlusHalfWidth = cdims.x + (0.5 * cdims.width);
           if (xPlusHalfWidth >= minX && xPlusHalfWidth <= maxX &&
-              cdims.y >= minY && cdims.y <= maxY) {            
+              cdims.y >= minY && cdims.y <= maxY) {
             return i;
           }
         }
@@ -987,7 +987,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     },
     /** Update the markup array for annot, placing the given character into the
       * string associated with the given quad. */
-    updateMarkup: function canvasGraphicsUpdateMarkup(annot, quad, glyph, charDims, isSpace) {      
+    updateMarkup: function canvasGraphicsUpdateMarkup(annot, quad, glyph, charDims, isSpace) {
       if (quad < 0) return;
       // check whether glyph.fontChar is valid Ascii, otherwise use glyph.unicode
       // http://stackoverflow.com/a/13522793
@@ -1007,7 +1007,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       // char details for debugging
       var charInfo = {};
       charInfo.fontChar = glyph.fontChar;
-      charInfo.unicode = glyph.unicode;      
+      charInfo.unicode = glyph.unicode;
       charInfo.charDims = charDims;
       charInfo.isSpace = isSpace;
       // add to annotation object
@@ -1030,10 +1030,10 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         if (isSpace && lastCharSpace) return;
         // exclude previous space if it is further right then current character
         var lastChar = annot.chars.slice(-1)[0];
-        if(!isSpace && lastCharSpace && typeof lastChar.charDims.x !== 'undefined' && 
+        if(!isSpace && lastCharSpace && typeof lastChar.charDims.x !== 'undefined' &&
             lastChar.charDims.x/*-charDims.spaceWidth*/>charDims.x+charDims.spaceWidth) {
           annot.markup[quad] = annot.markup[quad].substring(0, markupEnd);
-          annot.chars = annot.chars.splice(0,annot.chars.length-1);          
+          annot.chars = annot.chars.splice(0,annot.chars.length-1);
           lastChar = annot.chars.slice(-1)[0];
           annot.markupGeom[quad].brx = lastChar.charDims.x + lastChar.charDims.width;
           // reset markupEnd and lastCharSpace
@@ -1057,10 +1057,10 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         }
 
         // add current character
-        if (!isSpace && annot.markupGeom[quad].brx < charDims.x + charDims.width) {          
+        if (!isSpace && annot.markupGeom[quad].brx < charDims.x + charDims.width) {
           annot.markupGeom[quad].brx = charDims.x + charDims.width;
           annot.markup[quad] += character;
-          charInfo.character = character;          
+          charInfo.character = character;
           annot.chars.push(charInfo);
         }
         // add space but exclude mini spaces
@@ -1076,7 +1076,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
           if (annot.spaceSize.length>0) {
             var sum = annot.spaceSize.reduce(function(a, b) { return a + b });
-            var avg = sum / annot.spaceSize.length;            
+            var avg = sum / annot.spaceSize.length;
             if(charDims.width/avg<0.3) return;
           }
           annot.spaceSize.push(charDims.width);
@@ -1094,7 +1094,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var ctx = this.ctx;
       var current = this.current;
       var font = current.font;
-      var glyphs = font.charsToGlyphs(str);      
+      var glyphs = font.charsToGlyphs(str);
       var fontSize = current.fontSize;
       var fontSizeScale = current.fontSizeScale;
       var charSpacing = current.charSpacing;
@@ -1111,7 +1111,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var defaultVMetrics = font.defaultVMetrics;
       var show = false;
 
-      // Type3 fonts - each glyph is a "mini-PDF"      
+      // Type3 fonts - each glyph is a "mini-PDF"
       if (font.coded) {
         ctx.save();
         ctx.transform.apply(ctx, current.textMatrix);
@@ -1154,12 +1154,12 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
             var chDims = this.makeCharDims(transformed[0] * fontSize, width,
                                            font, ctx.mozCurrentTransform);
             for (var j = 0; j < this.annotations.length; j++) {
-              var annot = this.annotations[j];              
+              var annot = this.annotations[j];
               var quad = this.charInAnnot(annot, glyph, chDims, ctx.user2dev);
               this.updateMarkup(annot, quad, glyph, chDims, false);
             }
           }
-          
+
           canvasWidth += width;
         }
         ctx.restore();
@@ -1185,7 +1185,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
         ctx.lineWidth = lineWidth;
 
-        var x = 0;        
+        var x = 0;
         for (var i = 0; i < glyphsLength; ++i) {
           var glyph = glyphs[i];
           if (glyph === null) {
@@ -1256,15 +1256,15 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
               }
             }
           }
-          
-          if (this.annotations && ctx.user2dev) {            
+
+          if (this.annotations && ctx.user2dev) {
             // check if glyph is within an annotation
             // var charDims = this.makeCharDims(glyph.width * fontSize * .001, x, font, ctx.mozCurrentTransform);
-            var charDims = this.makeCharDims(width * fontSize * current.fontMatrix[0], x, font, ctx.mozCurrentTransform);            
+            var charDims = this.makeCharDims(width * fontSize * current.fontMatrix[0], x, font, ctx.mozCurrentTransform);
             glyph.print = false;
             for (var j = 0; j < this.annotations.length; j++) {
               var annot = this.annotations[j];
-              var quad = this.charInAnnot(annot, glyph, charDims, ctx.user2dev);              
+              var quad = this.charInAnnot(annot, glyph, charDims, ctx.user2dev);
               this.updateMarkup(annot, quad, glyph, charDims, false);
             }
           }
@@ -1329,17 +1329,17 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           }
 
           if (textSelection || this.annotations)
-            spacingAccumulator += spacingLength;          
+            spacingAccumulator += spacingLength;
 
           if (this.annotations && ctx.user2dev) {
               var charDims =
                 this.makeCharDims(spacingLength,
                                   canvasWidth - spacingLength,
-                                  font, font2dev);              
+                                  font, font2dev);
               for (var j = 0; j < this.annotations.length; j++) {
                 var annot = this.annotations[j];
-                var quad = this.charInAnnot(annot, {'fontChar':' ', 'unicode': ' '}, charDims, ctx.user2dev);                
-                this.updateMarkup(annot, quad, {'fontChar':' ', 'unicode': ' '}, charDims, true); 
+                var quad = this.charInAnnot(annot, {'fontChar':' ', 'unicode': ' '}, charDims, ctx.user2dev);
+                this.updateMarkup(annot, quad, {'fontChar':' ', 'unicode': ' '}, charDims, true);
               }
             }
 
