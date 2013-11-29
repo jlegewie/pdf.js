@@ -25,7 +25,7 @@
 
 var PartialEvaluator = (function PartialEvaluatorClosure() {
   function PartialEvaluator(pdfManager, xref, handler, pageIndex,
-                            uniquePrefix, idCounters) {
+                            uniquePrefix) {
     this.state = new EvalState();
     this.stateStack = [];
 
@@ -34,7 +34,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     this.handler = handler;
     this.pageIndex = pageIndex;
     this.uniquePrefix = uniquePrefix;
-    this.idCounters = idCounters;
+    this.objIdCounter = 0;
+    this.fontIdCounter = 0;
   }
 
   // Specifies properties for each command
@@ -276,7 +277,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       // If there is no imageMask, create the PDFImage and a lot
       // of image processing can be done here.
       var uniquePrefix = this.uniquePrefix || '';
-      var objId = 'img_' + uniquePrefix + (++this.idCounters.obj);
+      var objId = 'img_' + uniquePrefix + (++this.objIdCounter);
       dependencies[objId] = true;
       retData.args = [objId, w, h];
 
@@ -509,11 +510,11 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       font = xref.fetchIfRef(font) || fontRes.get(fontName);
       if (!isDict(font)) {
-        ++this.idCounters.font;
+        ++this.fontIdCounter;
         promise.resolve({
           font: {
             translated: new ErrorFont('Font ' + fontName + ' is not available'),
-            loadedName: 'g_font_' + this.uniquePrefix + this.idCounters.obj
+            loadedName: 'g_font_' + this.uniquePrefix + this.fontIdCounter
           },
           dependencies: {}
         });
@@ -524,7 +525,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       if (!loadedName) {
         // keep track of each font we translated so the caller can
         // load them asynchronously before calling display on a page
-        loadedName = 'g_font_' + this.uniquePrefix + (this.idCounters.font + 1);
+        loadedName = 'g_font_' + this.uniquePrefix + (this.fontIdCounter + 1);
         font.loadedName = loadedName;
 
         var translated;
@@ -574,7 +575,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           });
         }
 
-        ++this.idCounters.font;
+        ++this.fontIdCounter;
       } else {
         promise.resolve({
           font: font,
