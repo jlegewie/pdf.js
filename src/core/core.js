@@ -269,6 +269,17 @@ var Page = (function PageClosure() {
       for (var i = 0, n = annotations.length; i < n; ++i) {
         annotationsData.push(annotations[i].getData());
       }
+      // sort items in visual order: top->bottom, left->right
+      function sortAnnotations(a, b) {
+        // rect=[x1, y1, x2, y2]
+        if (a.rect[2] < b.rect[0]) return -1;
+        if (b.rect[2] < a.rect[0]) return 1;
+        if (a.rect[1] < b.rect[1]) return 1;
+        if (a.rect[1] > b.rect[1]) return -1;
+        return 0;
+      }
+      annotationsData.sort(sortAnnotations);
+      // return annotations
       return annotationsData;
     },
 
