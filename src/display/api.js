@@ -422,7 +422,7 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
      * @return {RenderTask} An extended promise that is resolved when the page
      * finishes rendering (see RenderTask).
      */
-    render: function PDFPageProxy_render(params) {
+    render: function PDFPageProxy_render(params, annotations) {
       var stats = this.stats;
       stats.time('Overall');
 
@@ -449,7 +449,7 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
 
       var internalRenderTask = new InternalRenderTask(complete, params,
                                        this.objs, this.commonObjs,
-                                       this.operatorList, this.pageNumber);
+                                       this.operatorList, this.pageNumber, annotations);
       this.renderTasks.push(internalRenderTask);
       var renderTask = new RenderTask(internalRenderTask);
 
@@ -1123,7 +1123,7 @@ var RenderTask = (function RenderTaskClosure() {
 var InternalRenderTask = (function InternalRenderTaskClosure() {
 
   function InternalRenderTask(callback, params, objs, commonObjs, operatorList,
-                              pageNumber) {
+                              pageNumber, annotations) {
     this.callback = callback;
     this.params = params;
     this.objs = objs;
@@ -1131,6 +1131,7 @@ var InternalRenderTask = (function InternalRenderTaskClosure() {
     this.operatorListIdx = null;
     this.operatorList = operatorList;
     this.pageNumber = pageNumber;
+    this.annotations = annotations;
     this.running = false;
     this.graphicsReadyCallback = null;
     this.graphicsReady = false;
@@ -1155,7 +1156,8 @@ var InternalRenderTask = (function InternalRenderTaskClosure() {
       var params = this.params;
       this.gfx = new CanvasGraphics(params.canvasContext, this.commonObjs,
                                     this.objs, params.textLayer,
-                                    params.imageLayer);
+                                    params.imageLayer,
+                                    this.annotations);
 
       this.gfx.beginDrawing(params.viewport, transparency);
       this.operatorListIdx = 0;

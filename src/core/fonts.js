@@ -2203,6 +2203,16 @@ function fontCharsToUnicode(charCodes, font) {
   return result;
 }
 
+function glyphToUnicode(glyph) {
+  if (!glyph)
+    return '';
+
+  var glyphUnicode = glyph.unicode;
+  if (glyphUnicode in NormalizedUnicodes)
+    glyphUnicode = NormalizedUnicodes[glyphUnicode];
+  return reverseIfRtl(glyphUnicode);
+}
+
 function adjustWidths(properties) {
   if (properties.fontMatrix[0] === FONT_IDENTITY_MATRIX[0]) {
     return;
@@ -2887,6 +2897,7 @@ var Font = (function FontClosure() {
         if (this.hasOwnProperty(i))
           data[i] = this[i];
       }
+      data.spaceWidth = this.spaceWidth;
       return data;
     },
 

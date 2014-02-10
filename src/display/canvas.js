@@ -398,7 +398,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
   // before it stops and shedules a continue of execution.
   var EXECUTION_TIME = 15;
 
-  function CanvasGraphics(canvasCtx, commonObjs, objs, textLayer, imageLayer) {
+  function CanvasGraphics(canvasCtx, commonObjs, objs, textLayer, imageLayer, annotations) {
     this.ctx = canvasCtx;
     this.current = new CanvasExtraState();
     this.stateStack = [];
@@ -409,6 +409,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     this.commonObjs = commonObjs;
     this.objs = objs;
     this.textLayer = textLayer;
+    this.annotations = annotations;
     this.imageLayer = imageLayer;
     this.groupStack = [];
     this.processingType3 = null;
@@ -676,6 +677,8 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       this.ctx.transform.apply(this.ctx, transform);
 
       this.baseTransform = this.ctx.mozCurrentTransform.slice();
+      // project coordinates of quadPoints to device space
+      this.makeAnnoDims(this.annotations, this.baseTransform);
 
       if (this.textLayer) {
         this.textLayer.beginLayout();
@@ -1208,6 +1211,156 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       return geometry;
     },
 
+    /** Compute the coordinates and width of the character given its width and
+    * x-offset in font space, a font object, and a matrix used for transforming
+    * from font space to device space. Returns an object with the character's
+    * x, y, and width properties, and the width of a space in the given font,
+    * all in device space.
+    */
+    makeCharDims: function canvasMakeCharDims(charWidth, xOffset, font, font2dev) {
+      var xy = Util.applyTransform([xOffset, 0], font2dev);
+      var w = Util.applyTransform([xOffset + charWidth, 0], font2dev);
+      var dims = {x: xy[0], y: xy[1]};
+      dims.width = Math.abs(xy[0] - w[0]);
+      var spaceWidth = font.coded ? font.spaceWidth : font.spaceWidth * .001;
+      var sw = Util.applyTransform([spaceWidth,0], font2dev);
+      // TODO: why 2.0? I changed it to 3
+      // dims.spaceWidth = (sw[0] - font2dev[4]) / 2.0;
+      dims.spaceWidth = (sw[0] - font2dev[4]) / 3.0;
+      return dims;
+    },
+    /** Compute the coordinates of the quadpoints given its the annotations
+    * and a matrix used for transforming from font space to device space. */
+    makeAnnoDims: function canvasMakeAnnoDims(annotations, user2dev) {
+      for (var j = 0; j < annotations.length; j++) {
+        var annot = annotations[j];
+        if (!annot.subtype || (annot.subtype != 'Highlight' && annot.subtype != 'Underline'))
+          continue;
+        for (var i = 0; i < annot.quadPoints.length; i++) {
+          var quad = annot.quadPoints[i];
+          var qxy0 = Util.applyTransform([quad.x, quad.y], user2dev);
+          var quadOtherCorner = [quad.x + quad.width, quad.y + quad.height];
+          var qxy1 = Util.applyTransform(quadOtherCorner, user2dev);
+          annot.quadPoints[i].dims = {
+            'minX': Math.min(qxy0[0], qxy1[0]),
+            'maxX': Math.max(qxy0[0], qxy1[0]),
+            'minY': Math.min(qxy0[1], qxy1[1]),
+            'maxY': Math.max(qxy0[1], qxy1[1])
+          };
+        }
+      }
+    },
+    /** Determines if character, with the given dimensions, falls within the
+      * bounds of annotation annot. If so, returns the 0-based index of the quad
+      * region within which the character falls. If the character is outside the
+      * annotation, returns -1. */
+    charInAnnot: function canvasCharInAnnot(annot, cdims) {
+      if (!annot.subtype || (annot.subtype != 'Highlight' && annot.subtype != 'Underline'))
+        return -1;
+      for (var i = 0; i < annot.quadPoints.length; i++) {
+        var qdims = annot.quadPoints[i].dims;
+        // only grab characters where 50% of the character's
+        // width lies within the annotation
+        var xPlusHalfWidth = cdims.x + (0.5 * cdims.width);
+        if (xPlusHalfWidth >= qdims.minX && xPlusHalfWidth <= qdims.maxX &&
+            cdims.y >=qdims.minY && cdims.y <= qdims.maxY) {
+          return i;
+        }
+      }
+      return -1;
+    },
+    /** Update the markup array for annot, placing the given character into the
+      * string associated with the given quad. */
+    updateMarkup: function canvasGraphicsUpdateMarkup(annot, quad, glyph, charDims, isSpace) {
+      if (quad < 0)
+        return;
+      var character = glyph.str,
+          charInfo = {},
+          lastChar, markupEnd, lastCharSpace;
+      if(character===undefined || (!annot.markup && character==' '))
+        return;
+      // char details for debugging
+      charInfo.glyph = glyph;
+      charInfo.charDims = charDims;
+      charInfo.isSpace = isSpace;
+      // add to annotation object
+      if (!annot.markup) {
+        annot.markup = [];
+        annot.markupGeom = [];
+        annot.chars = [];
+        annot.spaceSize = [];
+      }
+      if (!annot.markup[quad]) {
+        // annot.markupGeom[quad].brx ensures that only characters are added that are right of the first one in annotation
+        annot.markupGeom[quad] = {brx: charDims.x + charDims.width};
+        annot.markup[quad] = character;
+        charInfo.character = character;
+        annot.chars.push(charInfo);
+      } else {
+        markupEnd = annot.markup[quad].length - 1;
+        lastCharSpace = (annot.markup[quad].charAt(markupEnd) == ' ');
+        // exclude double spaces
+        if (isSpace && lastCharSpace) return;
+        // exclude previous space if it is further right then current character
+        lastChar = annot.chars.slice(-1)[0];
+        if(!isSpace && lastCharSpace && typeof lastChar.charDims.x !== 'undefined' &&
+            lastChar.charDims.x/*-charDims.spaceWidth*/>charDims.x+charDims.spaceWidth) {
+          // 'test6' benefits from removing out this line
+          annot.markup[quad] = annot.markup[quad].substring(0, markupEnd);
+          annot.chars = annot.chars.splice(0,annot.chars.length-1);
+          lastChar = annot.chars.slice(-1)[0];
+          annot.markupGeom[quad].brx = lastChar.charDims.x + lastChar.charDims.width;
+          // reset markupEnd and lastCharSpace
+          markupEnd = annot.markup[quad].length - 1;
+          lastCharSpace = (annot.markup[quad].charAt(markupEnd) == ' ');
+        }
+
+        // insert space if ...
+        if (!isSpace && !lastCharSpace && (charDims.spaceWidth !== 0 || /^[\u201C\(]*$/.test(character) ) &&
+          charDims.x > annot.markupGeom[quad].brx + charDims.spaceWidth) {
+          annot.markup[quad] += ' ';
+          charInfo.character = ' ';
+          annot.chars.push(charInfo);
+        }
+
+        // add current character
+        if (!isSpace && annot.markupGeom[quad].brx < charDims.x + charDims.width) {
+          annot.markupGeom[quad].brx = charDims.x + charDims.width;
+          annot.markup[quad] += character;
+          charInfo.character = character;
+          annot.chars.push(charInfo);
+        }
+        // add space but exclude mini spaces
+        if (isSpace) {
+          // late char (a-z or digits)
+          lastChar = null;
+          for (var c = annot.chars.length-1; c >= annot.chars.length; c--) {
+            var ch = annot.chars[c].character;
+            if(/^[\w]*$/.test(ch)) {
+              lastChar=ch;
+              break;
+            }
+          }
+          if (lastChar === null) lastChar = annot.chars.slice(-1)[0];
+          // do not add 'mini' spaces that are between to characters of one word
+          var relativeSize = charDims.width/lastChar.charDims.width;
+          if(relativeSize<0.2) return;
+
+          if (annot.spaceSize.length>0) {
+            var sum = annot.spaceSize.reduce(function(a, b) { return a + b;});
+            var avg = sum / annot.spaceSize.length;
+            if(charDims.width/avg<0.3) return;
+          }
+          annot.spaceSize.push(charDims.width);
+          // add space
+          annot.markupGeom[quad].brx = charDims.x + charDims.width;
+          annot.markup[quad] += character;
+          charInfo.character = character;
+          annot.chars.push(charInfo);
+        }
+      }
+    },
+
     paintChar: function (character, x, y) {
       var ctx = this.ctx;
       var current = this.current;
@@ -1290,7 +1443,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var fontMatrix = current.fontMatrix || FONT_IDENTITY_MATRIX;
       var glyphsLength = glyphs.length;
       var textLayer = this.textLayer;
-      var geom;
+      var geom, font2dev = [];
       var textSelection = textLayer && !skipTextSelection ? true : false;
       var canvasWidth = 0.0;
       var vertical = font.vertical;
@@ -1301,10 +1454,11 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         ctx.save();
         ctx.transform.apply(ctx, current.textMatrix);
         ctx.translate(current.x, current.y);
+        font2dev = ctx.mozCurrentTransform;
 
         ctx.scale(textHScale, 1);
 
-        if (textSelection) {
+        if (textSelection || this.annotation) {
           this.save();
           ctx.scale(1, -1);
           geom = this.createTextGeometry();
@@ -1334,6 +1488,16 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           ctx.translate(width, 0);
           current.x += width * textHScale;
 
+          if (this.annotations) {
+            // check if glyph is within an annotation            
+            var chDims = this.makeCharDims(transformed[0] * fontSize, width, font, font2dev);
+            for (var j = 0; j < this.annotations.length; j++) {
+              var annot = this.annotations[j];
+              var quad = this.charInAnnot(annot, chDims);
+              this.updateMarkup(annot, quad, glyph, chDims, false);
+            }
+          }
+
           canvasWidth += width;
         }
         ctx.restore();
@@ -1341,6 +1505,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       } else {
         ctx.save();
         this.applyTextTransforms();
+        font2dev = ctx.mozCurrentTransform;
 
         var lineWidth = current.lineWidth;
         var a1 = current.textMatrix[0], b1 = current.textMatrix[1];
@@ -1350,7 +1515,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         else
           lineWidth /= scale;
 
-        if (textSelection)
+        if (textSelection || this.annotations)
           geom = this.createTextGeometry();
 
         if (fontSizeScale != 1.0) {
@@ -1407,11 +1572,22 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
               }
             }
 
-            this.paintChar(character, scaledX, scaledY);
+            /*this.paintChar(character, scaledX, scaledY);
             if (accent) {
               scaledAccentX = scaledX + accent.offset.x / fontSizeScale;
               scaledAccentY = scaledY - accent.offset.y / fontSizeScale;
               this.paintChar(accent.fontChar, scaledAccentX, scaledAccentY);
+            }*/
+          }
+
+          if (this.annotations) {
+            // check if glyph is within an annotation
+            var charDims = this.makeCharDims(width * fontSize * current.fontMatrix[0], x, font, font2dev);
+            glyph.print = false;
+            for (var j = 0; j < this.annotations.length; j++) {
+              var annot = this.annotations[j];
+              var quad = this.charInAnnot(annot, charDims);
+              this.updateMarkup(annot, quad, glyph, charDims, false);
             }
           }
 
@@ -1454,12 +1630,14 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var geom;
       var canvasWidth = 0.0;
       var textSelection = textLayer ? true : false;
+      var font2dev = [];
       var vertical = font.vertical;
       var spacingAccumulator = 0;
 
-      if (textSelection) {
+      if (textSelection || this.annotations) {
         ctx.save();
         this.applyTextTransforms();
+        font2dev = ctx.mozCurrentTransform.slice(0, 6);
         geom = this.createTextGeometry();
         ctx.restore();
       }
@@ -1474,12 +1652,22 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
             current.x += spacingLength;
           }
 
-          if (textSelection)
+          if (textSelection || this.annotations)
             spacingAccumulator += spacingLength;
+
+          if (this.annotations) {            
+            var charDims = this.makeCharDims(spacingLength, canvasWidth - spacingLength, font, font2dev);
+            for (var j = 0; j < this.annotations.length; j++) {
+              var annot = this.annotations[j];
+              var quad = this.charInAnnot(annot, charDims);
+              this.updateMarkup(annot, quad, {str: ' '}, charDims, true);
+            }
+          }
+
         } else {
           var shownCanvasWidth = this.showText(e, true);
 
-          if (textSelection) {
+          if (textSelection || this.annotations) {
             canvasWidth += spacingAccumulator + shownCanvasWidth;
             spacingAccumulator = 0;
           }
@@ -1683,6 +1871,9 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         this.transform.apply(this, matrix);
 
       this.baseTransform = this.ctx.mozCurrentTransform;
+      // project coordinates of quadPoints to device space
+      this.makeAnnoDims(this.annotations, this.baseTransform);
+
 
       if (bbox && isArray(bbox) && 4 == bbox.length) {
         var width = bbox[2] - bbox[0];
@@ -1696,6 +1887,8 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     paintFormXObjectEnd: function CanvasGraphics_paintFormXObjectEnd() {
       this.restore();
       this.baseTransform = this.baseTransformStack.pop();
+      // project coordinates of quadPoints to device space
+      this.makeAnnoDims(this.annotations, this.baseTransform);
     },
 
     beginGroup: function CanvasGraphics_beginGroup(group) {
