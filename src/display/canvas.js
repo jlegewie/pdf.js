@@ -1243,16 +1243,13 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     * x, y, and width properties, and the width of a space in the given font,
     * all in device space.
     */
-    makeCharDims: function canvasMakeCharDims(charWidth, xOffset, font, font2dev) {
+    makeCharDims: function canvasMakeCharDims(charWidth, xOffset, spaceWidth, font2dev) {
       var xy = Util.applyTransform([xOffset, 0], font2dev);
-      var w = Util.applyTransform([xOffset + charWidth, 0], font2dev);
+      var w = Util.applyTransformX([xOffset + charWidth, 0], font2dev);
       var dims = {x: xy[0], y: xy[1]};
-      dims.width = Math.abs(xy[0] - w[0]);
-      var spaceWidth = font.coded ? font.spaceWidth : font.spaceWidth * .001;
-      var sw = Util.applyTransform([spaceWidth,0], font2dev);
-      // TODO: why 2.0? I changed it to 3
-      // dims.spaceWidth = (sw[0] - font2dev[4]) / 2.0;
-      dims.spaceWidth = (sw[0] - font2dev[4]) / 3.0;
+      dims.width = Math.abs(xy[0] - w);
+      dims.spaceWidth = spaceWidth;
+      dims.xPlusHalfWidth = dims.x + (0.5 * dims.width);
       return dims;
     },
     /** Compute the coordinates of the quadpoints given its the annotations
@@ -1286,9 +1283,8 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       for (var i = 0; i < annot.quadPoints.length; i++) {
         var qdims = annot.quadPoints[i].dims;
         // only grab characters where 50% of the character's
-        // width lies within the annotation
-        var xPlusHalfWidth = cdims.x + (0.5 * cdims.width);
-        if (xPlusHalfWidth >= qdims.minX && xPlusHalfWidth <= qdims.maxX &&
+        // width lies within the annotation        
+        if (cdims.xPlusHalfWidth >= qdims.minX && cdims.xPlusHalfWidth <= qdims.maxX &&
             cdims.y >=qdims.minY && cdims.y <= qdims.maxY) {
           return i;
         }
@@ -1314,7 +1310,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         annot.markup = [];
         annot.markupGeom = [];
         annot.chars = [];
-        annot.spaceSize = [];
+        annot.spaces = {'n':0, 'sumWidth':0};
       }
       if (!annot.markup[quad]) {
         // annot.markupGeom[quad].brx ensures that only characters are added that are right of the first one in annotation
@@ -1372,12 +1368,14 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           var relativeSize = charDims.width/lastChar.charDims.width;
           if(relativeSize<0.2) return;
 
-          if (annot.spaceSize.length>0) {
-            var sum = annot.spaceSize.reduce(function(a, b) { return a + b;});
-            var avg = sum / annot.spaceSize.length;
+          // exclude spaces that are small compred to others
+          if (annot.spaces.n>0) {
+            var avg = annot.spaces.sumWidth/annot.spaces.n;
             if(charDims.width/avg<0.3) return;
           }
-          annot.spaceSize.push(charDims.width);
+          annot.spaces.sumWidth = annot.spaces.sumWidth + charDims.width;
+          annot.spaces.n++;
+
           // add space
           annot.markupGeom[quad].brx = charDims.x + charDims.width;
           annot.markup[quad] += character;
@@ -1465,6 +1463,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var fontSizeScale = current.fontSizeScale;
       var charSpacing = current.charSpacing;
       var wordSpacing = current.wordSpacing;
+      var spaceWidth = font.coded ? font.spaceWidth : font.spaceWidth * 0.001;
       var textHScale = current.textHScale * current.fontDirection;
       var fontMatrix = current.fontMatrix || FONT_IDENTITY_MATRIX;
       var glyphsLength = glyphs.length;
@@ -1474,6 +1473,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var canvasWidth = 0.0;
       var vertical = font.vertical;
       var defaultVMetrics = font.defaultVMetrics;
+      var sw, spaceWidthProj;
 
       // Type3 fonts - each glyph is a "mini-PDF"
       if (font.coded) {
@@ -1481,6 +1481,11 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         ctx.transform.apply(ctx, current.textMatrix);
         ctx.translate(current.x, current.y);
         font2dev = ctx.mozCurrentTransform;
+        // projected spaceWidth
+        sw = Util.applyTransformX([spaceWidth,0], font2dev);
+        // TODO: why 2.0? I changed it to 3
+        // dims.spaceWidth = (sw[0] - font2dev[4]) / 2.0;
+        spaceWidthProj = (sw - font2dev[4]) / 3.0;
 
         ctx.scale(textHScale, 1);
 
@@ -1507,8 +1512,8 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           this.executeOperatorList(glyph.operatorList);
           this.restore();
 
-          var transformed = Util.applyTransform([glyph.width, 0], fontMatrix);
-          var width = (transformed[0] * fontSize + charSpacing) *
+          var transformed = Util.applyTransformX([glyph.width, 0], fontMatrix);
+          var width = (transformed * fontSize + charSpacing) *
                       current.fontDirection;
 
           ctx.translate(width, 0);
@@ -1516,7 +1521,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
           if (this.annotations) {
             // check if glyph is within an annotation            
-            var chDims = this.makeCharDims(transformed[0] * fontSize, width, font, font2dev);
+            var chDims = this.makeCharDims(transformed * fontSize, width, spaceWidthProj, font2dev);
             for (var j = 0; j < this.annotations.length; j++) {
               var annot = this.annotations[j];
               var quad = this.charInAnnot(annot, chDims);
@@ -1532,6 +1537,11 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         ctx.save();
         this.applyTextTransforms();
         font2dev = ctx.mozCurrentTransform;
+        // projected spaceWidth
+        sw = Util.applyTransformX([spaceWidth,0], font2dev);
+        // TODO: why 2.0? I changed it to 3
+        // dims.spaceWidth = (sw[0] - font2dev[4]) / 2.0;
+        spaceWidthProj = (sw - font2dev[4]) / 3.0;
 
         var lineWidth = current.lineWidth;
         var a1 = current.textMatrix[0], b1 = current.textMatrix[1];
@@ -1602,7 +1612,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
           if (this.annotations) {
             // check if glyph is within an annotation
-            var charDims = this.makeCharDims(width * fontSize * current.fontMatrix[0], x, font, font2dev);
+            var charDims = this.makeCharDims(width * fontSize * current.fontMatrix[0], x, spaceWidthProj, font2dev);
             glyph.print = false;
             for (var j = 0; j < this.annotations.length; j++) {
               var annot = this.annotations[j];
@@ -1652,6 +1662,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var current = this.current;
       var font = current.font;
       var fontSize = current.fontSize;
+      var spaceWidth = font.coded ? font.spaceWidth : font.spaceWidth * 0.001;
       // TJ array's number is independent from fontMatrix
       var textHScale = current.textHScale * 0.001 * current.fontDirection;
       var arrLength = arr.length;
@@ -1667,6 +1678,11 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         ctx.save();
         this.applyTextTransforms();
         font2dev = ctx.mozCurrentTransform.slice(0, 6);
+        // projected spaceWidth
+        var sw = Util.applyTransformX([spaceWidth,0], font2dev);
+        // TODO: why 2.0? I changed it to 3
+        // dims.spaceWidth = (sw[0] - font2dev[4]) / 2.0;
+        var spaceWidthProj = (sw - font2dev[4]) / 3.0;
         geom = this.createTextGeometry();
         ctx.restore();
       }
@@ -1686,7 +1702,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           }
 
           if (this.annotations) {
-            var charDims = this.makeCharDims(spacingLength, canvasWidth - spacingLength, font, font2dev);
+            var charDims = this.makeCharDims(spacingLength, canvasWidth - spacingLength, spaceWidthProj, font2dev);
             for (var j = 0; j < this.annotations.length; j++) {
               var annot = this.annotations[j];
               var quad = this.charInAnnot(annot, charDims);
@@ -2064,7 +2080,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     },
 
     paintJpegXObject: function CanvasGraphics_paintJpegXObject(objId, w, h) {
-      var domImage = this.objs.get(objId);
+     var domImage = this.objs.get(objId);
       if (!domImage) {
         error('Dependent image isn\'t ready yet');
       }

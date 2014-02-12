@@ -84,6 +84,13 @@ var Annotation = (function AnnotationClosure() {
     data.rect = Util.normalizeRect(rect);
     data.annotationFlags = dict.get('F');
 
+    if (data.subtype=='Highlight') {
+      var content = dict.get('Contents');
+      data.content = stringToPDFString(content || '');
+      var title = dict.get('T');
+      data.title = stringToPDFString(title || '');
+    }
+
     // get quad points for annotation
     data.quadPoints = [];
     var quadpts = dict.get('QuadPoints') || [];
@@ -836,6 +843,7 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
 
   // Lets URLs beginning with 'www.' default to using the 'http://' protocol.
   function addDefaultProtocolToUrl(url) {
+
     if (url && url.indexOf('www.') === 0) {
       return ('http://' + url);
     }
