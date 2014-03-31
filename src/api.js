@@ -311,25 +311,27 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
       var continueCallback = params.continueCallback;
 
       // Once the operatorList and fonts are loaded, do the actual rendering.
-      this.displayReadyPromise.then(
-        function pageDisplayReadyPromise() {
-          if (self.destroyed) {
-            complete();
-            return;
-          }
+      this.getAnnotations().then(function(annos) {
+        this.displayReadyPromise.then(
+          function pageDisplayReadyPromise() {
+            if (self.destroyed) {
+              complete();
+              return;
+            }
+            var gfx = new CanvasGraphics(params.canvasContext, this.commonObjs,
+              this.objs, params.textLayer, params.imageLayer, annos);
+            try {
+              this.display(gfx, params.viewport, complete, continueCallback);
+            } catch (e) {
+              complete(e);
+            }
 
-          var gfx = new CanvasGraphics(params.canvasContext, this.commonObjs,
-            this.objs, params.textLayer, params.imageLayer);
-          try {
-            this.display(gfx, params.viewport, complete, continueCallback);
-          } catch (e) {
-            complete(e);
+          }.bind(this),
+          function pageDisplayReadPromiseError(reason) {
+            complete(reason);
           }
-        }.bind(this),
-        function pageDisplayReadPromiseError(reason) {
-          complete(reason);
-        }
-      );
+        );
+      }.bind(this));
 
       return promise;
     },

@@ -66,6 +66,10 @@ var Page = (function PageClosure() {
     this.pageDict = pageDict;
     this.xref = xref;
     this.ref = ref;
+    this.idCounters = {
+      font: 0,
+      obj: 0
+    };
   }
 
   Page.prototype = {
@@ -159,17 +163,19 @@ var Page = (function PageClosure() {
       var contentStreamPromise = pdfManager.ensure(this, 'getContentStream',
                                                    []);
       var resourcesPromise = pdfManager.ensure(this, 'resources');
+
+      var partialEvaluator = new PartialEvaluator(
+            pdfManager, this.xref, handler,
+            this.pageIndex, 'p' + this.pageIndex + '_',
+            this.idCounters);
+
       var dataPromises = Promise.all(
           [contentStreamPromise, resourcesPromise]);
       dataPromises.then(function(data) {
         var contentStream = data[0];
         var resources = data[1];
-        var pe = self.pe = new PartialEvaluator(
-                                  pdfManager,
-                                  self.xref, handler, self.pageIndex,
-                                  'p' + self.pageIndex + '_');
 
-        pdfManager.ensure(pe, 'getOperatorList',
+        pdfManager.ensure(partialEvaluator, 'getOperatorList',
                           [contentStream, resources]).then(
           function(opListPromise) {
             opListPromise.then(function(data) {
@@ -181,11 +187,7 @@ var Page = (function PageClosure() {
 
       pdfManager.ensure(this, 'getAnnotationsForDraw', []).then(
         function(annotations) {
-          var annotationEvaluator = new PartialEvaluator(
-            pdfManager, self.xref, handler, self.pageIndex,
-            'p' + self.pageIndex + '_annotation');
-
-          pdfManager.ensure(annotationEvaluator, 'getAnnotationsOperatorList',
+          pdfManager.ensure(partialEvaluator, 'getAnnotationsOperatorList',
                             [annotations]).then(
             function(opListPromise) {
               opListPromise.then(function(data) {
@@ -242,12 +244,13 @@ var Page = (function PageClosure() {
       dataPromises.then(function(data) {
         var contentStream = data[0];
         var resources = data[1];
-        var pe = new PartialEvaluator(
-                       pdfManager,
-                       self.xref, handler, self.pageIndex,
-                       'p' + self.pageIndex + '_');
+        var partialEvaluator = new PartialEvaluator(
+              pdfManager, self.xref, handler,
+              self.pageIndex, 'p' + self.pageIndex + '_',
+              self.idCounters);
 
-        pe.getTextContent(contentStream, resources).then(function(bidiTexts) {
+        partialEvaluator.getTextContent(
+            contentStream, resources).then(function(bidiTexts) {
           textContentPromise.resolve({
             bidiTexts: bidiTexts
           });
@@ -320,6 +323,7 @@ var Page = (function PageClosure() {
     },
 
     getAnnotationsBase: function Page_getAnnotationsBase() {
+      if (this.annotationsList) return this.annotationsList;
       var xref = this.xref;
       function getInheritableProperty(annotation, name) {
         var item = annotation;
@@ -362,8 +366,29 @@ var Page = (function PageClosure() {
 
         var item = {};
         item.type = subtype.name;
+        // list of quad regions
+        item.quadPoints = [];
+        var quadpts = annotation.get('QuadPoints') || [];
+        for (var j = 0; j < quadpts.length; j += 8) {
+          // NB: we don't transform the quadpoints here, but later once we know
+          // the user space => device space transformation.
+          var topLeft = {x: quadpts[j + 4], y: quadpts[j + 5]};
+          var bottomRight = {x: quadpts[j + 2], y: quadpts[j + 3]};
+          var quad = {};
+          quad.x = Math.min(topLeft.x, bottomRight.x);
+          quad.y = Math.min(topLeft.y, bottomRight.y);
+          quad.width = Math.abs(topLeft.x - bottomRight.x);
+          quad.height = Math.abs(topLeft.y - bottomRight.y);
+          item.quadPoints.push(quad);
+        }
         var rect = annotation.get('Rect');
         item.rect = Util.normalizeRect(rect);
+        // var topLeftCorner = this.rotatePoint(rect[0], rect[1]);
+        // var bottomRightCorner = this.rotatePoint(rect[2], rect[3]);
+        // item.x = Math.min(topLeftCorner.x, bottomRightCorner.x);
+        // item.y = Math.min(topLeftCorner.y, bottomRightCorner.y);
+        // item.width = Math.abs(topLeftCorner.x - bottomRightCorner.x);
+        // item.height = Math.abs(topLeftCorner.y - bottomRightCorner.y);
 
         var includeAnnotation = true;
         switch (subtype.name) {
@@ -460,10 +485,18 @@ var Page = (function PageClosure() {
           case 'Text':
             var content = annotation.get('Contents');
             var title = annotation.get('T');
+            var name = annotation.get('Name');
             item.content = stringToPDFString(content || '');
             item.title = stringToPDFString(title || '');
-            item.name = !annotation.has('Name') ? 'Note' :
-              annotation.get('Name').name;
+            item.name = name ? name.name : 'Note';
+            break;
+          case 'Highlight':
+          case 'Underline':
+            var content = annotation.get('Contents');
+            var title = annotation.get('T');
+            // sometimes there's no content, only markup
+            if (content) item.content = stringToPDFString(content);
+            item.title = stringToPDFString(title || '');
             break;
           default:
             var appearance = getDefaultAnnotationAppearance(annotation);
@@ -479,6 +512,21 @@ var Page = (function PageClosure() {
           });
         }
       }
+      // sort items in visual order: top->bottom, left->right
+      function sortAnnotations(a, b) {
+        // rect=[x1, y1, x2, y2]
+        if (a.item.rect[2] < b.item.rect[0]) return -1;
+        if (b.item.rect[2] < a.item.rect[0]) return 1;
+        if (a.item.rect[1] < b.item.rect[1]) return 1;
+        if (a.item.rect[1] > b.item.rect[1]) return -1;
+        return 0;
+      }
+      items.sort(sortAnnotations);
+      // items.forEach(function(a) {console.log(a.item.type + ': ' + a.item.rect);})
+
+      this.annotationsList = items;
+      return this.annotationsList;
+
       return items;
     }
   };
