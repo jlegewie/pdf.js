@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/css" href="/test/extract/libs/tooltipster/css/tooltipster.css" />
+	<link rel="stylesheet" type="text/css" href="/test/extract/libs/tooltipster/css/tooltipster-theme.css" />
+	<!-- js libraries -->
+	<script type="text/javascript" src="/test/extract/utils.js"></script>
+	<script type="text/javascript" src="/test/extract/libs/yepnope.js"></script>
+	<script type="text/javascript" src="/test/extract/libs/d3.min.js"></script>
+	<script type="text/javascript" src="/test/extract/libs/jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="/test/extract/libs/tooltipster/jquery.tooltipster.min.js"></script>
+	<script type="text/javascript" src="/test/extract/table.js"></script>
+	<script type="text/javascript" src="/test/extract/libs/diff_match_patch.js"></script>
+	<script type="text/javascript" src="/test/extract/libs/jquery.pretty-text-diff.min.js"></script>
+	<!-- Add fancyBox -->
+	<link rel="stylesheet" href="/test/extract/libs/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="/test/extract/libs/jquery.fancybox.pack.js?v=2.1.5"></script>
+	<!-- extract script -->
+	<script type="text/javascript" charset="utf-8" src="extract.js"></script>
+
+	<style>
+		ins {
+		    background-color: #c6ffc6;
+		    text-decoration: none;
+		}
+
+		del {
+		    background-color: #ffc6c6;
+		}
+
+		#wrapper {
+			font-family: Helvetica;
+			font-size: 10px;
+			font-weight: 100;
+			line-height: 10px;
+			padding: 8px 10px;
+		}
+
+		td.original {
+			padding-bottom: 6px;
+		}
+		td.changed {
+			padding-bottom: 6px;
+		}
+		td.diff {
+			padding-bottom: 6px;
+		}
+
+	</style>
+
+
+</head>
+
+<body>
+	<div id="fancybox-divs" style="display:none"></div>
+	<div id="output"></div>
+	<canvas id="the-canvas" style="border:1px solid black;"/>
+</body>
+
+</html>

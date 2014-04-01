@@ -1,0 +1,14 @@
+.tooltipster-my {
+	border-radius: 5px; 
+	border: 1px solid #cccccc;
+	background: #fff;
+	color: #666666;
+	width: 90%;
+}
+.tooltipster-my .tooltipster-content {
+	font-family: Helvetica;
+	font-weight: 100;
+	font-size: 10px;
+	line-height: 10px;
+	padding: 8px 10px;
+}
