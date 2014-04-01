@@ -359,7 +359,7 @@ var url = 'https://raw2.github.com/jlegewie/pdf.js/{0}/{1}',
             'version': '3.1dev',
             'name': 'v3_1dev',
             'branch': 'local',
-            'scripts': ['/src/shared/util.js', '/src/shared/colorspace.js', '/src/display/pattern_helper.js', '/src/shared/function.js', '/src/shared/annotation.js', '/src/display/api.js', '/src/display/metadata.js', '/src/display/canvas.js', '/src/display/font_loader.js', script],
+            'scripts': ['/src/shared/util.js', '/src/shared/colorspace.js', '/src/display/pattern_helper.js', '/src/shared/function.js', '/src/shared/annotation.js', '/src/display/api.js', '/src/display/metadata.js', '/src/display/canvas.js', '/src/display/font_loader.js', '/src/getPDFAnnotations.js'],
             'worker': '/src/worker_loader.js'
         },
         {
@@ -391,8 +391,14 @@ var url = 'https://raw2.github.com/jlegewie/pdf.js/{0}/{1}',
 // get url arguments
 var arg = getQueryParams(document.location.search),
     idx = arg.version ? arg.version : 0,
-    compare = arg.version ? false : true,
-    pdfs = arg.file ? [{'file': arg.file}] : pdfs;
+    compare = arg.version ? false : true;
+if(arg.file) {
+    pdfs = pdfs.filter(function(pdf) {
+        return pdf.file==arg.file;
+    });
+    pdfs = pdfs.length==1 ? pdfs : [{'file': arg.file}];
+}
+
 arg.debug = arg.debug ? Number(arg.debug) : 0;
 
 $(document).ready(function() {
@@ -417,6 +423,7 @@ $(document).ready(function() {
                     PDFJS.getPDFAnnotations = getPDFAnnotations;
                 // get annotations
                 PDFJS.workerSrc = v.branch=='local' ? v.worker : url.format(v.branch, v.worker);
+                // PDFJS.workerSrc = '/src/worker_loader.js';
                 // var progress = function(x,y) {console.log('Pages ' + x + ' out of ' + y);},
                 var progress = function(x,y) {};
                 var getAnnos = function(i) {
@@ -464,7 +471,6 @@ $(document).ready(function() {
                         else {
                             if(compare && (j+1)<pdfExtract.length) {
                                 PDFJS = undefined;
-                                console.log(j+1);
                                 loadExtractionScript(j+1);
                             }
                             else {
@@ -472,7 +478,7 @@ $(document).ready(function() {
                                 Object.keys(tooltips).forEach(function(key) {
                                     var head = '<div id="wrapper"> <table class="table table-striped table-bordered table-hover"> <thead> <tr> <th>Extracted</th> <th>Original</th> <th>Diff</th> </tr> </thead> <tbody>',
                                         row = '<tr> <td class="original">{0}</td> <td class="changed">{1}</td> <td class="diff"></td> </tr>',
-                                        footer = '</tbody> </table> </div>';
+                                        footer = '</tbody> </table> </div>',
                                         content = head,
                                         content_tt = head,
                                         idBox = key.replace('tooltip','fancybox');

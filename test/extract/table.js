@@ -13,7 +13,7 @@ var createTable = function() {
         });
     // var names = ['File', 'Version', 'Duration'];
     var head1 = table.append('thead').append('tr');
-    head1.append('th').text('File').attr('rowspan', 2).attr('valign', 'top');
+    head1.append('th').text('File').attr('rowspan', 2).attr('valign', 'bottom');
     head1.selectAll('th.output')
         .data(pdfExtract).enter()
             .append('th')
