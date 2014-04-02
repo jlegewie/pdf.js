@@ -362,7 +362,26 @@
                 "content": ""
             }
         ]
+    },
+    {
+        "file": "/test/extract/pdf/Sanders-2002.pdf",
+        "annotations": [
+            {
+                "markup": "doi: 10.1146/annurev.soc.28.110601.140741",
+                "content": ""
+            },
+            {
+                "markup": "Consequently, ethnic identities are fluid across time and social contexts, sometimes even to the point of \"ethnic switching\" (Alba 1990, Nagel 1995).",
+                "content": ""
+            },
+            {
+                "markup": "Ethnic distinctions sometimes coincide with territorial segregation in the host society and with social constructions of racial identity. Widely acknowledged racial differences can sharpen in-group members' self-identification and out-group acknowledgment of intergroup distinctions.Similarly,when interaction between groups is limited and otherwise conditioned by territorial segregation, intergroup differences gain emphasis.Constraints on cross-group interaction contribute to the respective groups ignorance of one another. This, in turn, encourages stereotyping. Race and the segregating tendencies of territorial concentrations are not necessarily components of ethnic boundaries, but when one or both of these elements of social organization obtain,they can play important roles in the maintenance of ethnic boundaries.",
+                "content": ""
+            },
+            {
+                "markup": "Yang F, Ebaugh HR. 2001. Transformationisn new immigrant religions and their global implications. Am. Sociol. Rev. 66:269-88",
+                "content": ""
+            }
+        ]
     }
 ]
-
-
