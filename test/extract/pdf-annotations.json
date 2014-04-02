@@ -340,5 +340,29 @@
                 "content": ""
             }
         ]
+    },
+    {
+        "file": "/test/pdfs/issue3188.pdf",
+        "annotations": [
+            {
+                "markup": "KÖNYVAJAÁNLOÓ: Think Like A Programmer",
+                "content": ""
+            }
+        ]
+    },
+    {
+        "file": "/test/extract/pdf/test-type3-font.pdf",
+        "annotations": [
+            {
+                "markup": "This work was performed as part of the California PATH Program of the",
+                "content": ""
+            },
+            {
+                "markup": "Principal Investigator:",
+                "content": ""
+            }
+        ]
     }
 ]
+
+
