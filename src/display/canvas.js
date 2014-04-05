@@ -1353,9 +1353,18 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         // insert space if ...
         if (!isSpace && !lastCharSpace && (charDims.spaceWidth !== 0 || /^[\u201C\(]*$/.test(character) ) &&
           charDims.x > annot.markupGeom[quad].brx + charDims.spaceWidth) {
-          annot.markup[quad] += ' ';
-          charInfo.character = ' ';
-          annot.chars.push(charInfo);
+          // last char (a-z or digits)
+          lastChar = this.getLastAZChar(annot);
+          // do not add 'mini' or comparatively small spaces
+          var width = charDims.x - annot.markupGeom[quad].brx,
+              relativeSize = width/lastChar.charDims.width,
+              miniSpace = relativeSize<0.1,
+              smallSpace = annot.spaces.n>0 ? width/(annot.spaces.sumWidth/annot.spaces.n)<0.3 : false;
+          if(!miniSpace && !smallSpace) {
+            annot.markup[quad] += ' ';
+            charInfo.character = ' ';
+            annot.chars.push(charInfo);
+          }
         }
 
         // add current character
