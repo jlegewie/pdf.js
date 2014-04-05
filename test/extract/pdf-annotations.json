@@ -70,7 +70,7 @@
                 "content":""
             },  
             {
-                "markup": "ed on the expectation that programs spend most of their time in hot loops. Even in dynamically typed languages, we expect hot loops to be mostly type-stable, meaning that the types of values are in variant. (12) For example, we would expect loop counters that start as i",
+                "markup": "ed on the expectation that programs spend most of their time in hot loops. Even in dynamically typed languages, we expect hot loops to be mostly type-stable, meaning that the types of values are invariant. (12) For example, we would expect loop counters that start as i",
                 "content":""
             },
             {
@@ -98,7 +98,7 @@
                 "content":""
             },
             {
-                "markup": "Extending a tree. Side exits lead to different paths through the loop, or paths with different types or representations. Thus, to completely cover the loop, the VM must record traces starting at all side exits. These traces are recorded much like root traces: there is a counter for each side exit, and when the counter reaches a hotness threshold, recording starts. Recording stops exactly as for the root trace, using the loop header of the root trace as the tar get to reach.",
+                "markup": "Extending a tree. Side exits lead to different paths through the loop, or paths with different types or representations. Thus, to completely cover the loop, the VM must record traces starting at all side exits. These traces are recorded much like root traces: there is a counter for each side exit, and when the counter reaches a hotness threshold, recording starts. Recording stops exactly as for the root trace, using the loop header of the root trace as the target to reach.",
                 "content":""
             },
             {
@@ -106,7 +106,7 @@
                 "content":""
             },
             {
-                "markup": "SpiderMonkey, like many VMs, needs to preempt the user program periodically. The main reasons are to prevent infinitely looping scripts from locking up the host system and to schedule GC. In the interpreter, this had been implemented by setting a \"preempt now\" flag that was checked on every backward jump. This strategy carried over into TraceMonkey: the VM inserts a guard on the preemption flag at every loop edge. We measured less than a 1% increase in runtime on most benchmarks for this extra guard. In practice, the cost is detectable only for programs with very short loops. We tested and rejected a solution that a voided the guards by compiling the loop edge as an unconditional jump, and patching the jump target to an exit routine when preemption is required. This solution can make th",
+                "markup": "SpiderMonkey, like many VMs, needs to preempt the user program periodically. The main reasons are to prevent infinitely looping scripts from locking up the host system and to schedule GC. In the interpreter, this had been implemented by setting a \"preempt now\" flag that was checked on every backward jump. This strategy carried over into TraceMonkey: the VM inserts a guard on the preemption flag at every loop edge. We measured less than a 1% increase in runtime on most benchmarks for this extra guard. In practice, the cost is detectable only for programs with very short loops. We tested and rejected a solution that avoided the guards by compiling the loop edge as an unconditional jump, and patching the jump target to an exit routine when preemption is required. This solution can make th",
                 "content":""
             },
             {
@@ -359,6 +359,51 @@
             {
                 "markup": "Yang F, Ebaugh HR. 2001. Transformationisn new immigrant religions and their global implications. Am. Sociol. Rev. 66:269-88",
                 "content": ""
+            }
+        ]
+    },   
+    {
+        "file": "/test/extract/pdf/OBrien-2013.pdf",
+        "annotations": [
+            {
+                "markup": "We focus here on one of the most influential concepts in the urban sciences—that of physical disorder, including the iconic \"broken window,\" the accumulation of litter, the presence of graffiti, or other indications that a neighborhood is poorly maintained and monitored. Such incivilities are often associated with elevated crime rates (Wilson and Kelling 1982; Sampson and Raudenbush 1999) and lower mental, physical and behavioral health among residents (O'Brien and Kauffman 2013; Caughy, Nettles, and O'Campo 2008; Wen, Hawkley, and Cacioppo 2006; Mujahid et al. 2008; Burdette and Hill 2008; Furr-Holden et al. 2012), attracting attention from a variety of disciplines (Cohen et al. 2000; O'Brien and Wilson 2011; Taylor 2001; Caughy, O'Campo, and Patterson 2001).",
+                "content": ""
+            },
+            {
+                "markup": "Colloquially known as a Mayor's Hotline or 311 line, these systems provide constituents with a variety of channels for directly requesting services from the city government, using phone, internet or smart phone applications that communicate requests to the appropriate department. The resultant database is a detailed documentation of constituent needs, leading some of its champions to refer to it as \"the eyes and ears of the city.\" Many of the requests refer to individual instances of physical disorder, like graffiti or abandoned housing, giving the database the ability to reflect their prevalence across neighborhoods.",
+                "content": ""
+            },
+            {
+                "markup": "All the above being true, the CRM database was not created for the purposes of disorder research, and therefore has three major weaknesses that any methodology must address. First, the substantive content of the database is noisy, and it is not immediately apparent what it can measure, nor how it can do so. Some cases, like requests for graffiti removal, are clear examples of physical disorder, but others, like scheduling a bulk item pickup, are not. Second, there may be some aspect of data collection that creates systematic biases in measurement. For instance and quite importantly, the CRM system may suffer from skewed reporting in the incidence of disorder across neighborhoods. Last, there is no information about what scale of geographical analysis the database can support—for example, census block groups or tracts—nor over what time spans.",
+                "content": ""
+            },
+            {
+                "markup": "The current manuscript uses the CRM database from Boston to illustrate the multiple analytic steps in the original formulation of ecometrics. This process is reported in three parts, each requiring its own distinct logic, data sources, and analytical approach. Analysis 1 examines the content within CRM database that reflects physical disorder, and uses correlational analyses to identify an underlying factor structure. Analysis 2 then addresses the validity of any measure extracted from the CRM database by assessing biases in reporting through original data collection involving neighborhood audits. A method is then developed for using auxiliary measures from within the CRM database to estimate these biases, and to help account for overor underreporting. Analysis 3 then examines the reliability of these composite measures by identifying the spatial and temporal ranges at which its measurement is consistent.",
+                "content": ""
+            },
+            {
+                "markup": "develops an adjustment technique for creating modified measures that take into account reporting bias.",
+                "content": "Be more explicit about this adjustment process in our paper."
+            },
+            {
+                "markup": "The second stage of the analysis will then use factor analysis to explore the dimensionality of these items. Given their large number, it seems feasible that they will not describe a unitary construct, but one with multiple aspects that are related but distinct.",
+                "content": "First step is to identify the relevant measured theoretically."
+            },
+            {
+                "markup": "A subset of types reflected examples of physical disorder arising from either human negligence or denigration of the neighborhood (e.g., illegal dumping, abandoned bicycle). Other case types either did not indicate physical disorder (e.g., general request, bulk item pickup) or indicated deterioration that was not the fault of local residents (e.g., street light outage).",
+                "content": ""
+            },
+            {
+                "markup": "iterated principal factors estimation and a promax rotation, in order to address the Poisson distributions of the variables; Tabachnick and Fidell 2006",
+                "content": ""
+            },
+            {
+                "markup": "Analysis 1 thus suggests that the CRM database is capable of measuring two distinct but related aspects of physical disorder: private neglect and public denigration.",
+                "content": ""
+            },
+            {
+                "markup": "it depends on a perfect one-to-one correspondence between reports and issues, however, and is weakened by the existence of false positives (reports with no actual issue, or multiple reports of a single issue) and false negatives (a lack of a report where an issue exists). These inaccuracies will likely be a function of the tendency of a neighborhood's residents and visitors to report issues. In regions where residents are particularly vigilant, a single issue might instigate a handful of reports, thereby creating false positives. In regions that are lacking in such activity, an issue might sit unaddressed for a lengthy period, or even indefinitely, creating a false negative. Such differences between neighborhoods might be referred to as the civic response rate.",
+                "content": "I like the concept \"civic response rate\" and the more detailed discussion of this issue."
             }
         ]
     }
