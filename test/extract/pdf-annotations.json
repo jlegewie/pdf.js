@@ -70,7 +70,7 @@
                 "content":""
             },  
             {
-                "markup": "sed on the expectation that programs spend most of their time in hot loops. Even in dynamically typed languages, we expect hot loops to be mostly type-stable , meaning that the types of values are in variant. (12) For example, we would expect loop counters that start as i",
+                "markup": "ed on the expectation that programs spend most of their time in hot loops. Even in dynamically typed languages, we expect hot loops to be mostly type-stable, meaning that the types of values are in variant. (12) For example, we would expect loop counters that start as i",
                 "content":""
             },
             {
@@ -86,7 +86,7 @@
                 "content":""
             },
             {
-                "markup": "Sometimes these stores can be optimized a way as the stack locations are live only on exits to the interpreter. Finally, the LIR records",
+                "markup": "Sometimes these stores can be optimized away as the stack locations are live only on exits to the interpreter. Finally, the LIR rec",
                 "content":""
             },
             {
@@ -106,7 +106,7 @@
                 "content":""
             },
             {
-                "markup": "SpiderMonky, like many VMs, needs to preempt the user program periodically. The main reasons are to prevent infinitely looping scripts from locking up the host system and to schedule GC. In the interpreter, this had been implemented by setting a \"preempt now\" flag that was checked on every backward jump. This strategy carried over into TraceMonkey: the VM inserts a guard on the preemption flag at every loop edge. We measured less than a 1% increase in runtime on most benchmarks for this extra guard. In practice, the cost is detectable only for programs with very short loops. We tested and rejected a solution that a voided the guards by compiling the loop edge as an unconditional jump, and patching the jump tar get to an exit routine when preemption is required. This solution can make th",
+                "markup": "SpiderMonkey, like many VMs, needs to preempt the user program periodically. The main reasons are to prevent infinitely looping scripts from locking up the host system and to schedule GC. In the interpreter, this had been implemented by setting a \"preempt now\" flag that was checked on every backward jump. This strategy carried over into TraceMonkey: the VM inserts a guard on the preemption flag at every loop edge. We measured less than a 1% increase in runtime on most benchmarks for this extra guard. In practice, the cost is detectable only for programs with very short loops. We tested and rejected a solution that a voided the guards by compiling the loop edge as an unconditional jump, and patching the jump target to an exit routine when preemption is required. This solution can make th",
                 "content":""
             },
             {
@@ -114,7 +114,7 @@
                 "content":""
             },
             {
-                "markup": "Speedup vs. a baseline JavaScript interpreter (SpiderMonkey) for our trace-based JIT compiler, Apple's SquirrelFish Extreme inline threading interpreter and Google's V8 JS compiler. Our system generates particularly efficient code for programs that benefit most from type specialization, which includes SunSpider Benchmark programs that perform bit manipulation. We type-specialize the code in question to use integer arithmetic, which substantially improves performance. For one of the benchmark programs we execute 25 times faster than the SpiderMonkey interpreter , and almost 5 times faster than V8 and SFX. For a large number of benchmarks all three VMs produce similar results. We perform worst on benchmark programs that we do not trace and instead fall back onto the interpreter. This includes the recursive benchmarks access-binary-trees and control-flow-recursive, for which we currently don't generate any native code.",
+                "markup": "Speedup vs. a baseline JavaScript interpreter (SpiderMonkey) for our trace-based JIT compiler, Apple's SquirrelFish Extreme inline threading interpreter and Google's V8 JS compiler. Our system generates particularly efficient code for programs that benefit most from type specialization, which includes SunSpider Benchmark programs that perform bit manipulation. We type-specialize the code in question to use integer arithmetic, which substantially improves performance. For one of the benchmark programs we execute 25 times faster than the SpiderMonkey interpreter, and almost 5 times faster than V8 and SFX. For a large number of benchmarks all three VMs produce similar results. We perform worst on benchmark programs that we do not trace and instead fall back onto the interpreter. This includes the recursive benchmarks access-binary-trees and control-flow-recursive, for which we currently don't generate any native code.",
                 "content":""
             },
             {
@@ -200,7 +200,7 @@
                 "content": ""
             },
             {
-                "markup": "In a broader sense, the sociological perspective or the situational approach focuses on the specific characteristics of the suspects and the situations in which the police encounter citizens. Terrill and Mastrofski (2002, p. 217) identify two distinct explanations within this domain: one being that force varies by who the citizen is the other focusing on what the citizen does . We expect that the behavior of the police officers should not be affected by the characteristics of the citizens such as race, gender, age, or social class.",
+                "markup": "In a broader sense, the sociological perspective or the situational approach focuses on the specific characteristics of the suspects and the situations in which the police encounter citizens. Terrill and Mastrofski (2002, p. 217) identify two distinct explanations within this domain: one being that force varies by who the citizen is the other focusing on what the citizen does. We expect that the behavior of the police officers should not be affected by the characteristics of the citizens such as race, gender, age, or social class.",
                 "content": ""
             },
             {
@@ -216,7 +216,7 @@
                 "content": ""
             },
             {
-                "markup": "Garner et al. (1996, p. 6) found in their Phoenix , Arizona stud y that in 918 (57.9 percent) of a total of 1,585 cases involving some form of force, the high est level of force used b y the polic e was so me form of restr aint; in another 350 (22.1 percent), no restraint was needed. Terrill's (2003) observational study of the police in Indianap olis, Indiana, and St. Petersbur g, Flo rida yi elded similar results. Afte r ex amining 3,544 police -suspect encounters, h e concluded that if verbal force is included , then most force falls into this categor y of behavior.",
+                "markup": "Garner et al. (1996, p. 6) found in their Phoenix, Arizona study that in 918 (57.9 percent) of a total of 1,585 cases involving some form of force, the highest level of force used by the police was some form of restraint; in another 350 (22.1 percent), no restraint was needed. Terrill's (2003) observational study of the police in Indianapolis, Indiana, and St. Petersburg, Florida yielded similar results. After examining 3,544 police-suspect encounters, he concluded that if verbal force is included, then most force falls into this category of behavior.",
                 "content": "Confirms my data about the prevalence of a milder form of force"
             },
             {
@@ -224,7 +224,7 @@
                 "content": ""
             },
             {
-                "markup": "since most of the police force occurs at low er levels, or starts at lower levels and escalades, more emphasis should be given to different levels of force rather than solely focusing on extreme levels of force.",
+                "markup": "since most of the police force occurs at lower levels, or starts at lower levels and escalades, more emphasis should be given to different levels of force rather than solely focusing on extreme levels of force.",
                 "content": ""
             },
             {
@@ -232,11 +232,11 @@
                 "content": ""
             },
             {
-                "markup": "to explain use of force (Brown, 1988; Herbert, 1 996, 1998; Lester, 1996; Paoline, Myers, & Worden, 2000; Skolnick & Fyfe, 1993; Smith, 1994; Terrill, Paoline, & Manning, 2003 ).",
+                "markup": "to explain use of force (Brown, 1988; Herbert, 1996, 1998; Lester, 1996; Paoline, Myers, & Worden, 2000; Skolnick & Fyfe, 1993; Smith, 1994; Terrill, Paoline, & Manning, 2003).",
                 "content": ""
             },
             {
-                "markup": "Previous research has frequently addressed characteristics of the suspects in police use of force incidents. Suspect's demo graphic characteristics (who the suspect is) and suspect's behavior and demeanor (what the suspect does) are often found to be correlated with the prevalence and the extent of police force. Several studies report suspect's age, sex, ethnicity, and intoxication as statistically significant predictors of police force (Alpert & Dunham, 1999; Alpert & Fridell, 1992; Friedrich, 1980; Garner et al., 1995; Garner et al. 2002; Terrill & Mastrofski, 2002; Worden, 1996).",
+                "markup": "Previous research has frequently addressed characteristics of the suspects in police use of force incidents. Suspect's demographic characteristics (who the suspect is) and suspect's behavior and demeanor (what the suspect does) are often found to be correlated with the prevalence and the extent of police force. Several studies report suspect's age, sex, ethnicity, and intoxication as statistically significant predictors of police force (Alpert & Dunham, 1999; Alpert & Fridell, 1992; Friedrich, 1980; Garner et al., 1995; Garner et al. 2002; Terrill & Mastrofski, 2002; Worden, 1996).",
                 "content": ""
             },
             {
@@ -244,7 +244,7 @@
                 "content": ""
             },
             {
-                "markup": "Some other studies, on the other hand, reported that race of the suspect was not associated with inc reased use of force (Friedrich, 1980; Fyfe, 1988; Garner et al., 1995; Garner et al., 2002). Among these studies, Friedrich (1980) noted that not",
+                "markup": "Some other studies, on the other hand, reported that race of the suspect was not associated with increased use of force (Friedrich, 1980; Fyfe, 1988; Garner et al., 1995; Garner et al., 2002). Among these studies, Friedrich (1980) noted that not",
                 "content": ""
             },
             {
@@ -292,11 +292,11 @@
                 "content": ""
             },
             {
-                "markup": "policy, but on their own personal experience. The exercise resulted in a measure that makes reasonable distinctions between different types of force. Officer presence, conversation and verbal commands are ranked near the bottom and the use of weapons especially firearms, are ranked at the top. The second step in developing the maximum force measure is to determine if such behaviors occurred in the sample of 7,152 arrests, and if so, to weigh them according to the rankings made by police officers. When officers reported that they engaged in two or more forceful acts, the one with the highest rank is recorded -hence the name is Maximum Force. This measure provid es a scale which helps us identify how the amount of force can be measured in away that approximates our understanding of variation in the use of force.",
+                "markup": "policy, but on their own personal experience. The exercise resulted in a measure that makes reasonable distinctions between different types of force. Officer presence, conversation and verbal commands are ranked near the bottom and the use of weapons especially firearms, are ranked at the top. The second step in developing the maximum force measure is to determine if such behaviors occurred in the sample of 7,152 arrests, and if so, to weigh them according to the rankings made by police officers. When officers reported that they engaged in two or more forceful acts, the one with the highest rank is recorded -hence the name is Maximum Force. This measure provides a scale which helps us identify how the amount of force can be measured in a way that approximates our understanding of variation in the use of force.",
                 "content": ""
             },
             {
-                "markup": "By using these two measures, this study attempts to overcome the limitations of depending solely on dichotomous variables which measure if physical force was used or not. Although those dichotomous measures are applied consistently across law enforcement agencies and capture the elements of force, they do not allow researchers to measure the amount of force used since they group together all uses of force from a push to use of deadly weapons .",
+                "markup": "By using these two measures, this study attempts to overcome the limitations of depending solely on dichotomous variables which measure if physical force was used or not. Although those dichotomous measures are applied consistently across law enforcement agencies and capture the elements of force, they do not allow researchers to measure the amount of force used since they group together all uses of force from a push to use of deadly weapons.",
                 "content": ""
             },
             {
@@ -324,45 +324,23 @@
                 "content": ""
             },
             {
-                "markup": "Garner, J .H., Max well, C.D., & Heraux , C.G. (2002). Characteristics associated with the prevalence and severity of force used by the police. Justice Quarterly, 19(4), 705-74 6.",
+                "markup": "Garner, J.H., Maxwell, C.D., & Heraux, C.G. (2002). Characteristics associated with the prevalence and severity of force used by the police. Justice Quarterly, 19(4), 705-746.",
                 "content": ""
             },
             {
-                "markup": "Geller, W.A., and Toch H. (1996). Understanding and controlling police abuse of force. In W.A. Geller & Toch, H. (Eds.), Police Violence: Understanding and Controlling Police Abuse of Force (pp. 292-328). New Haven, CT: Yale Universit y Press.",
+                "markup": "Geller, W.A., and Toch H. (1996). Understanding and controlling police abuse of force. In W.A. Geller & Toch, H. (Eds.), Police Violence: Understanding and Controlling Police Abuse of Force (pp. 292-328). New Haven, CT: Yale University Press.",
                 "content": ""
             },
             {
-                "markup": "Terrill, W ., & Mastrofski , S.D. (2002). Situational and officer-based determinants of police coercion. Justice Quarterly, 19(2), 2002.",
+                "markup": "Terrill, W., & Mastrofski, S.D. (2002). Situational and officer-based determinants of police coercion. Justice Quarterly, 19(2), 2002.",
                 "content": ""
             },
             {
-                "markup": "Terril, W. 2003. Police use of force and suspect resistance: the micro process of the police-suspect encounter. Police Quarterly, 6 (1), 51-83.",
+                "markup": "Terril, W. 2003. Police use of force and suspect resistance: the micro process of the police-suspect encounter. Police Quarterly, 6(1), 51-83.",
                 "content": ""
             }
         ]
-    },
-    {
-        "file": "/test/pdfs/issue3188.pdf",
-        "annotations": [
-            {
-                "markup": "KÖNYVAJAÁNLOÓ: Think Like A Programmer",
-                "content": ""
-            }
-        ]
-    },
-    {
-        "file": "/test/extract/pdf/test-type3-font.pdf",
-        "annotations": [
-            {
-                "markup": "This work was performed as part of the California PATH Program of the",
-                "content": ""
-            },
-            {
-                "markup": "Principal Investigator:",
-                "content": ""
-            }
-        ]
-    },
+    },   
     {
         "file": "/test/extract/pdf/Sanders-2002.pdf",
         "annotations": [
