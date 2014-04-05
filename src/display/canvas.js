@@ -1368,7 +1368,11 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         }
 
         // add current character
-        if (!isSpace && annot.markupGeom[quad].brx < charDims.x + charDims.width) {
+        // if (!isSpace && annot.markupGeom[quad].brx < charDims.x + charDims.width) {
+        if (!isSpace &&
+          ((annot.markupGeom[quad].brx < charDims.x + charDims.width) ||
+           (character==' ' && annot.markupGeom[quad].brx < charDims.x + lastChar.charDims.width))) {
+
           annot.markupGeom[quad].brx = charDims.x + charDims.width;
           annot.markup[quad] += character;
           charInfo.character = character;
