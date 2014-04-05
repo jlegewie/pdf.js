@@ -1291,6 +1291,19 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       }
       return -1;
     },
+    /** get last char (a-z or digits) */
+    getLastAZChar: function canvasGraphicsGetLastAZChar (annot) {
+      var lastChar, ch;
+      for (var c = annot.chars.length-1; c >= 0; c--) {
+        ch = annot.chars[c];
+        if(/^[\w]*$/.test(ch.character)) {
+          lastChar = ch;
+          break;
+        }
+      }
+      if (!lastChar) lastChar = annot.chars.slice(-1)[0];
+      return lastChar;
+    },
     /** Update the markup array for annot, placing the given character into the
       * string associated with the given quad. */
     updateMarkup: function canvasGraphicsUpdateMarkup(annot, quad, glyph, charDims, isSpace) {
@@ -1354,16 +1367,9 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         }
         // add space but exclude mini spaces
         if (isSpace) {
-          // late char (a-z or digits)
-          lastChar = null;
-          for (var c = annot.chars.length-1; c >= annot.chars.length; c--) {
-            var ch = annot.chars[c].character;
-            if(/^[\w]*$/.test(ch)) {
-              lastChar=ch;
-              break;
-            }
-          }
-          if (lastChar === null) lastChar = annot.chars.slice(-1)[0];
+          charInfo.character = character;
+          // last char (a-z or digits)
+          lastChar = this.getLastAZChar(annot);
           // do not add 'mini' spaces that are between to characters of one word
           var relativeSize = charDims.width/lastChar.charDims.width;
           if(relativeSize<0.2) return;
@@ -1379,7 +1385,6 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           // add space
           annot.markupGeom[quad].brx = charDims.x + charDims.width;
           annot.markup[quad] += character;
-          charInfo.character = character;
           annot.chars.push(charInfo);
         }
       }
