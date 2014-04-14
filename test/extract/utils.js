@@ -38,6 +38,22 @@ Array.prototype.min = function() {
   return Math.min.apply(null, this);
 };
 
+Array.prototype.average=function(){
+    var sum=0;
+    var j=0;
+    for(var i=0;i<this.length;i++){
+        if(isFinite(this[i])){
+          sum=sum+parseFloat(this[i]);
+           j++;
+        }
+    }
+    if(j===0){
+        return 0;
+    }else{
+        return sum/j;
+    }
+};
+
 /**
 * Calculates the Levenshtein distance between two strings
 */

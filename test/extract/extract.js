@@ -115,7 +115,7 @@ $.getJSON('/test/extract/pdf-annotations.json', function(pdfs) {
                             var id = annos.url.split('/').last().replace('.pdf',''),
                                 rows = [
                                     Math.round(annos.time*100)/100 + ' ms',
-                                    100*Math.round(distance.min()*10000)/10000 + '%'
+                                    100*Math.round(distance.average()*10000)/10000 + '%'
                                 ];
                             var ver = annos.version.replace('.','_');
                             d3.select('tbody').select('tr#' + id).selectAll('#v' + ver)
