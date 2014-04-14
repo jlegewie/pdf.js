@@ -78,7 +78,7 @@
                 "content":""
             },
             {
-                "markup": "header, but the outer loop header. At this point, the VM could continue tracing until it reaches the inner loop header again, thus tracing the outer",
+                "markup": "header, but the outer loop header. At this point, the VM could continue tracing until it reaches the inner loop header again, thus tracing the oute",
                 "content":""
             },
             {
@@ -404,6 +404,27 @@
             {
                 "markup": "it depends on a perfect one-to-one correspondence between reports and issues, however, and is weakened by the existence of false positives (reports with no actual issue, or multiple reports of a single issue) and false negatives (a lack of a report where an issue exists). These inaccuracies will likely be a function of the tendency of a neighborhood's residents and visitors to report issues. In regions where residents are particularly vigilant, a single issue might instigate a handful of reports, thereby creating false positives. In regions that are lacking in such activity, an issue might sit unaddressed for a lengthy period, or even indefinitely, creating a false negative. Such differences between neighborhoods might be referred to as the civic response rate.",
                 "content": "I like the concept \"civic response rate\" and the more detailed discussion of this issue."
+            }
+        ]
+    },   
+    {
+        "file": "/test/extract/pdf/Lee-2008.pdf",
+        "annotations": [
+            {
+                "markup": "Here, we are concerned with a practice common to this censusbased research: relying on a single type of spatial unit—typically the census tract (although sometimes the block group or block)—when computing segregation measures such as the index of dissimilarity.",
+                "content": ""
+            },
+            {
+                "markup": "The census tract is officially defined as a compact, recognizable, and homogeneous territorial unit with relatively permanent boundaries and an optimum population of about 4,000 people (U.S. Census Bureau 1997).1 Its popularity can be traced in part to its convenience and to the belief that it approximates a \"real\" neighborhood.",
+                "content": ""
+            },
+            {
+                "markup": "We contend, however, that conventional census studies, in which tracts are treated as discrete residential turfs, rest on three problematic assumptions—two about scale and one about proximity. While the assumption about proximity has been widely discussed in the segregation measurement literature (Dawkins 2004; Massey and Denton 1988; Morrill 1991; White 1983; Wong 1993), the two about scale have received less scrutiny.",
+                "content": ""
+            },
+            {
+                "markup": "To understand intermetropolitan differences in segregation levels, researchers often use some version of Farley and Frey's (1994) structural-ecological perspective (see also Frey and Farley 1996). The body of work inspired by this perspective finds that variation in segregation is related to metro area population size, region, functional specialization (e.g., as a military or retirement center), minority group size, and minority socioeconomic status, among other structural characteristics (Farrell 2005; Iceland and Nelson 2008; Logan et al. 2004; Timberlake and Iceland 2007; Wilkes and Iceland 2004).",
+                "content": ""
             }
         ]
     }
