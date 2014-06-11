@@ -12,8 +12,8 @@
 
 'use strict';
 
-var url = 'https://raw2.github.com/jlegewie/pdf.js/{0}/{1}',
-    script = 'https://raw2.github.com/jlegewie/pdf.js/809ed55841b0643892f7d6aac6999cca34f31db7/src/getPDFAnnotations.js',
+var url = 'http://localhost:8000/{0}/{1}',
+    script = 'http://localhost:8000/src/getPDFAnnotations.js',
     tooltips = {},
     getPDFAnnotations,
     pdfExtract = [{
@@ -94,7 +94,7 @@ $.getJSON('/test/extract/pdf-annotations.json', function(pdfs) {
                     d3.select('tbody').select('tr#' + id)
                         .select('td#file').text(pdfs[i].file);
                     // gett annotations                    
-                    PDFJS.getPDFAnnotations(pdfs[i].file, true, progress, arg.debug).then(function(annos) {
+                    PDFJS.getPDFAnnotations(pdfs[i].file, true, true, progress, arg.debug).then(function(annos) {
                         annos.version = pdfExtract[j].version;
                         console.log(annos);
                         var distance = [];
