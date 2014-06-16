@@ -22,8 +22,19 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, useColor, progress, debug
     /* http://www.html5rocks.com/en/tutorials/es6/promises*/
     var extract = function(resolve, reject) {
         var SUPPORTED_ANNOTS = ['Text','Highlight','Underline'],
-            obj = {annotations: [],
-                time:null,
+            obj = {
+				annotationsAll: [],
+                annotationsRed: [],
+				annotationsGreen: [],
+				annotationsBlue: [],
+				annotationsYellow: [],
+				annotationsOrange: [],
+				annotationsMagenta: [],
+				annotationsCyan: [],
+				annotationsGray: [],
+				annotationsBlack: [],
+				annotationsWhite: [],
+				time:null,
                 url: typeof url=='string' ? url : ''
             };
         // Fetch the PDF document from the URL using promices
@@ -127,27 +138,32 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, useColor, progress, debug
 										return "Red";
 										}
 										else {
-											if (h < 0.25) {
-											return "Yellow";
+											if (h < 0.11) {
+											return "Orange";
 											}
 											else {
-												if (h < 0.42) {
-												return "Green";
+												if (h < 0.25) {
+												return "Yellow";
 												}
 												else {
-													if (h < 0.58)  {
-													return "Cyan";
+													if (h < 0.42) {
+													return "Green";
 													}
 													else {
-														if (h < 0.75) {
-														return "Blue";
+														if (h < 0.58)  {
+														return "Cyan";
 														}
 														else {
-															if (h < 0.92) {
-															return "Magenta";
+															if (h < 0.75) {
+															return "Blue";
 															}
 															else {
-																return "Red";
+																if (h < 0.92) {
+																return "Magenta";
+																}
+																else {
+																	return "Red";
+																}
 															}
 														}
 													}
@@ -198,8 +214,74 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, useColor, progress, debug
                             // return
                             return anno;
                         });
-                        // add annotations to return object
-                        obj.annotations.push.apply(obj.annotations, annos);
+                        // separate annotations by color
+						if (useColor) {
+							var annosRed = [];
+							var annosGreen = [];
+							var annosBlue = [];
+							var annosYellow = [];
+							var annosOrange = [];
+							var annosMagenta = [];
+							var annosCyan = [];
+							var annosGray = [];
+							var annosBlack = [];
+							var annosWhite = [];
+							for (var i=0; i<annos.length; i++) {
+								var colorClass = annos[i].colorClass;
+								switch (colorClass) {
+									case 'Red':
+										annosRed.push(annos[i]);
+										break;
+									case 'Green':
+										annosGreen.push(annos[i]);
+										break;
+									case 'Blue':
+										annosBlue.push(annos[i]);
+										break;
+									case 'Yellow':
+										annosYellow.push(annos[i]);
+										break;
+									case 'Orange':
+										annosOrange.push(annos[i]);
+										break;
+									case 'Magenta':
+										annosMagenta.push(annos[i]);
+										break;
+									case 'Cyan':
+										annosCyan.push(annos[i]);
+										break;
+									case 'Gray':
+										annosGray.push(annos[i]);
+										break;
+									case 'Black':
+										annosBlack.push(annos[i]);
+										break;
+									case 'White':
+										annosWhite.push(annos[i]);
+										break;
+									default:
+										console.log("unknown color class: "+colorClass);
+								};
+							};
+							// add color-separated annotations to return object
+							obj.annotationsRed.push.apply(obj.annotationsRed, annosRed);
+							obj.annotationsGreen.push.apply(obj.annotationsGreen, annosGreen);
+							obj.annotationsBlue.push.apply(obj.annotationsBlue, annosBlue);
+							obj.annotationsYellow.push.apply(obj.annotationsYellow, annosYellow);
+							obj.annotationsOrange.push.apply(obj.annotationsOrange, annosOrange);
+							obj.annotationsMagenta.push.apply(obj.annotationsMagenta, annosMagenta);
+							obj.annotationsCyan.push.apply(obj.annotationsCyan, annosCyan);
+							obj.annotationsGray.push.apply(obj.annotationsGray, annosGray);
+							obj.annotationsBlack.push.apply(obj.annotationsBlack, annosBlack);
+							obj.annotationsWhite.push.apply(obj.annotationsWhite, annosWhite);
+							// delete empty annotationsAll key
+							delete obj.annotationsAll;
+						}
+						else {
+													
+							// add annotations to return object
+	                        obj.annotationsAll.push.apply(obj.annotationsAll, annos);
+						};
                         // render next page
                         progress(page.pageNumber, numPages);
                         if(numPages>page.pageNumber)
