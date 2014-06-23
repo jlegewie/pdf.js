@@ -94,7 +94,7 @@ $.getJSON('/test/extract/pdf-annotations.json', function(pdfs) {
                     d3.select('tbody').select('tr#' + id)
                         .select('td#file').text(pdfs[i].file);
                     // gett annotations                    
-                    PDFJS.getPDFAnnotations(pdfs[i].file, true, true, progress, arg.debug).then(function(annos) {
+                    PDFJS.getPDFAnnotations(pdfs[i].file, true, progress, arg.debug).then(function(annos) {
                         annos.version = pdfExtract[j].version;
                         console.log(annos);
                         var distance = [];
