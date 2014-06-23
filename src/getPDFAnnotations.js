@@ -11,11 +11,10 @@
  * @return {Promise} A promise that is resolved with an Object
  * that includes elements for path, time, and annotations.
  */
-PDFJS.getPDFAnnotations = function(url, removeHyphens, useColor, progress, debug) {
+PDFJS.getPDFAnnotations = function(url, removeHyphens, progress, debug) {
     // set default values
     removeHyphens = typeof removeHyphens !== 'undefined' ? removeHyphens : true;
-	useColor = typeof useColor !== 'undefined' ? useColor : true;
-    progress = typeof progress !== 'undefined' ? progress : function(x, y) {};
+	progress = typeof progress !== 'undefined' ? progress : function(x, y) {};
     debug = typeof debug !== 'undefined' ? debug : false;
     var legacyPromise = PDFJS.Promise!==undefined;
     // Return a new promise (with support for legacy pdf.js promises)
@@ -23,17 +22,7 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, useColor, progress, debug
     var extract = function(resolve, reject) {
         var SUPPORTED_ANNOTS = ['Text','Highlight','Underline'],
             obj = {
-				annotationsAll: [],
-                annotationsRed: [],
-				annotationsGreen: [],
-				annotationsBlue: [],
-				annotationsYellow: [],
-				annotationsOrange: [],
-				annotationsMagenta: [],
-				annotationsCyan: [],
-				annotationsGray: [],
-				annotationsBlack: [],
-				annotationsWhite: [],
+				annotations: [],                
 				time:null,
                 url: typeof url=='string' ? url : ''
             };
@@ -101,9 +90,17 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, useColor, progress, debug
                     var render = page.render(renderContext, annos);
                     if (render.promise!==undefined) render = render.promise;
                     render.then(function() {                    	   
+						// function to convert deviceRGB to RGB
+						function convertDeviceRGBtoRGB (dr, dg, db) {
+							var r = Math.round(dr*255);
+							var g = Math.round(dg*255);
+							var b = Math.round(db*255);
+							return [r, g, b];
+						}
 						// function to convert RGB to HSL, modified from http://stackoverflow.com/questions/2353211/hsl-to-rgb-color-conversion
 						function convertRGBtoHSL(r, g, b){
-						    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+						    r /= 255, g /= 255, b /= 255;
+							var max = Math.max(r, g, b), min = Math.min(r, g, b);
 						    var h, s, l = (max + min) / 2;
 						    if(max == min){
 						        h = s = 0; // achromatic
@@ -120,8 +117,8 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, useColor, progress, debug
 						    }
 						    return [h, s, l];
 						}
-						// function to add color classes, modified from http://stackoverflow.com/questions/8457601/how-can-i-classify-some-color-to-color-ranges
-						function addColorClass (h, s, l) {    
+						// function to add color categories, modified from http://stackoverflow.com/questions/8457601/how-can-i-classify-some-color-to-color-ranges
+						function addColorCategory (h, s, l) {    
 							if (l < 0.15)  {
 								return "Black";
 							}
@@ -177,9 +174,10 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, useColor, progress, debug
 						// clean markup and modify color information
                         annos = annos.map(function(anno) {
                             anno.page = page.pageNumber;
-							//convert embedded dRGB color into HSL and add color class
-							anno.color = convertRGBtoHSL(anno.color[0],anno.color[1],anno.color[2]);
-							anno.colorClass = addColorClass(anno.color[0],anno.color[1],anno.color[2]);
+							//convert embedded deviceRGB into RGB and then generate color categories via HSL
+							anno.color = convertDeviceRGBtoRGB(anno.color[0],anno.color[1],anno.color[2]);
+							anno.colorHSL = convertRGBtoHSL(anno.color[0],anno.color[1],anno.color[2]);
+							anno.colorCategory = addColorCategory(anno.colorHSL[0],anno.colorHSL[1],anno.colorHSL[2]);							
                             // clean markup
                             if(anno.markup) {
                                 anno.markup = anno.markup
@@ -207,81 +205,13 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, useColor, progress, debug
                                 delete anno.rect;
                                 delete anno.spaceSize;
                                 delete anno.name;
-								if (anno.colorClass) {
-									delete anno.color;
-								}
+								delete anno.colorHSL;
                             }
                             // return
                             return anno;
                         });
-                        // separate annotations by color
-						if (useColor) {
-							var annosRed = [];
-							var annosGreen = [];
-							var annosBlue = [];
-							var annosYellow = [];
-							var annosOrange = [];
-							var annosMagenta = [];
-							var annosCyan = [];
-							var annosGray = [];
-							var annosBlack = [];
-							var annosWhite = [];
-							for (var i=0; i<annos.length; i++) {
-								var colorClass = annos[i].colorClass;
-								switch (colorClass) {
-									case 'Red':
-										annosRed.push(annos[i]);
-										break;
-									case 'Green':
-										annosGreen.push(annos[i]);
-										break;
-									case 'Blue':
-										annosBlue.push(annos[i]);
-										break;
-									case 'Yellow':
-										annosYellow.push(annos[i]);
-										break;
-									case 'Orange':
-										annosOrange.push(annos[i]);
-										break;
-									case 'Magenta':
-										annosMagenta.push(annos[i]);
-										break;
-									case 'Cyan':
-										annosCyan.push(annos[i]);
-										break;
-									case 'Gray':
-										annosGray.push(annos[i]);
-										break;
-									case 'Black':
-										annosBlack.push(annos[i]);
-										break;
-									case 'White':
-										annosWhite.push(annos[i]);
-										break;
-									default:
-										console.log("unknown color class: "+colorClass);
-								};
-							};
-							// add color-separated annotations to return object
-							obj.annotationsRed.push.apply(obj.annotationsRed, annosRed);
-							obj.annotationsGreen.push.apply(obj.annotationsGreen, annosGreen);
-							obj.annotationsBlue.push.apply(obj.annotationsBlue, annosBlue);
-							obj.annotationsYellow.push.apply(obj.annotationsYellow, annosYellow);
-							obj.annotationsOrange.push.apply(obj.annotationsOrange, annosOrange);
-							obj.annotationsMagenta.push.apply(obj.annotationsMagenta, annosMagenta);
-							obj.annotationsCyan.push.apply(obj.annotationsCyan, annosCyan);
-							obj.annotationsGray.push.apply(obj.annotationsGray, annosGray);
-							obj.annotationsBlack.push.apply(obj.annotationsBlack, annosBlack);
-							obj.annotationsWhite.push.apply(obj.annotationsWhite, annosWhite);
-							// delete empty annotationsAll key
-							delete obj.annotationsAll;
-						}
-						else {
-													
-							// add annotations to return object
-	                        obj.annotationsAll.push.apply(obj.annotationsAll, annos);
-						};
+                        // add annotations to return object
+	                    obj.annotations.push.apply(obj.annotations, annos);
                         // render next page
                         progress(page.pageNumber, numPages);
                         if(numPages>page.pageNumber)
