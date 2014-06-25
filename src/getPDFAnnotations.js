@@ -208,7 +208,9 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, progress, debug) {
                                 delete anno.rect;
                                 delete anno.spaceSize;
                                 delete anno.name;
-								delete anno.colorHSL;
+								if (anno.colorCategory) {
+									delete anno.colorHSL;
+								};
                             }
                             // return
                             return anno;
