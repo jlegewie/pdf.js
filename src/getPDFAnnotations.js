@@ -113,7 +113,10 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, progress, debug) {
 						            case g: h = (b - r) / d + 2; break;
 						            case b: h = (r - g) / d + 4; break;
 						        }
-						        h /= 6;
+						        h*=60;
+              					if (h < 0) {
+                  					h +=360;
+              					}
 						    }
 						    return [h, s, l];
 						}
@@ -124,39 +127,39 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, progress, debug) {
 							}
 							else {
 								if (l > 0.98) {
-								return "White";
+									return "White";
 								}
 								else {
 									if (s < 0.2) {
-									return "Gray";
+										return "Gray";
 									}
 									else {
-										if (h < 0.08) {
-										return "Red";
+										if (h < 15) {
+											return "Red";
 										}
 										else {
-											if (h < 0.12) {
-											return "Orange";
+											if (h < 45) {
+												return "Orange";
 											}
 											else {
-												if (h < 0.25) {
-												return "Yellow";
+												if (h < 65) {
+													return "Yellow";
 												}
 												else {
-													if (h < 0.42) {
-													return "Green";
+													if (h < 170) {
+														return "Green";
 													}
 													else {
-														if (h < 0.58)  {
-														return "Cyan";
+														if (h < 190)  {
+															return "Cyan";
 														}
 														else {
-															if (h < 0.75) {
-															return "Blue";
+															if (h < 270) {
+																return "Blue";
 															}
 															else {
-																if (h < 0.92) {
-																return "Magenta";
+																if (h < 335) {
+																	return "Magenta";
 																}
 																else {
 																	return "Red";
