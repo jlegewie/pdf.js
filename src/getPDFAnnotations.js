@@ -122,7 +122,7 @@ PDFJS.getPDFAnnotations = function(url, removeHyphens, progress, debug) {
 						}
 						// function to add color categories, modified from http://stackoverflow.com/questions/8457601/how-can-i-classify-some-color-to-color-ranges
 						function addColorCategory (h, s, l) {    
-							if (l < 0.15)  {
+							if (l < 0.12)  {
 								return "Black";
 							}
 							else {
