@@ -12,8 +12,8 @@
 
 'use strict';
 
-var url = 'https://raw2.github.com/jlegewie/pdf.js/{0}/{1}',
-    script = 'https://raw2.github.com/jlegewie/pdf.js/809ed55841b0643892f7d6aac6999cca34f31db7/src/getPDFAnnotations.js',
+var url = 'http://localhost:8000/{0}/{1}',
+    script = 'http://localhost:8000/src/getPDFAnnotations.js',
     tooltips = {},
     getPDFAnnotations,
     pdfExtract = [{
