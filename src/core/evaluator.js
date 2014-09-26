@@ -327,6 +327,11 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     handleText: function PartialEvaluator_handleText(chars, state) {
       var font = state.font;
       var glyphs = font.charsToGlyphs(chars);
+      // add normalized unicode to glyphs
+      for (var i = 0; i < glyphs.length; i++) {
+        if(glyphs[i] !== null)
+          glyphs[i].str = glyphToUnicode(glyphs[i]);
+      }
       var isAddToPathSet = !!(state.textRenderingMode &
                               TextRenderingMode.ADD_TO_PATH_FLAG);
       if (font.data && (isAddToPathSet || PDFJS.disableFontFace)) {

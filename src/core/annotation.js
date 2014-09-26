@@ -78,6 +78,34 @@ var Annotation = (function AnnotationClosure() {
     data.rect = Util.normalizeRect(rect);
     data.annotationFlags = dict.get('F');
 
+    if (data.subtype=='Highlight') {
+      var content = dict.get('Contents');
+      data.content = stringToPDFString(content || '');
+      var title = dict.get('T');
+      data.title = stringToPDFString(title || '');
+    }
+
+    // annotation name
+    data.name = dict.get('NM');
+    // modification time
+    data.mtime = dict.get('M');
+
+    // get quad points for annotation
+    data.quadPoints = [];
+    var quadpts = dict.get('QuadPoints') || [];
+    for (var j = 0; j < quadpts.length; j += 8) {
+      // NB: we don't transform the quadpoints here, but later once we know
+      // the user space => device space transformation.
+      var topLeft = {x: quadpts[j + 4], y: quadpts[j + 5]};
+      var bottomRight = {x: quadpts[j + 2], y: quadpts[j + 3]};
+      var quad = {};
+      quad.x = Math.min(topLeft.x, bottomRight.x);
+      quad.y = Math.min(topLeft.y, bottomRight.y);
+      quad.width = Math.abs(topLeft.x - bottomRight.x);
+      quad.height = Math.abs(topLeft.y - bottomRight.y);
+      data.quadPoints.push(quad);
+    }
+    
     var color = dict.get('C');
     if (isArray(color) && color.length === 3) {
       // TODO(mack): currently only supporting rgb; need support different
