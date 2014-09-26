@@ -427,5 +427,38 @@
                 "content": ""
             }
         ]
+    },   
+    {
+        "file": "/test/extract/pdf/Penner-2008.pdf",
+        "annotations": [
+            {
+                "markup": "never-impoverished respondents identified",
+                "content": ""
+            },
+            {
+                "markup": "The variation over time in racial classification and identification is at odds with the view that race is an attribute of individuals that",
+                "content": ""
+            },
+            {
+                "markup": "is fixed at birth, and thus predates subsequent life outcomes, such as income or incarceration. Instead, we might think of individuals as having competing propensities for being classified into or identifying with different racial groups. Changes in these propensities likely ref lect, in part, the imprecision of dividing continuous human variation into a few discrete categories (7), as well as contextual variation in the location of racial divisions (1, 2, 5, 8). However, our findings also support the idea that racial propensities can be altered by changes in social position, much as a change in diet or stress level can alter a person's propensity to die of heart disease as opposed to cancer. This suggests that racial stereotypes can become self-fulfilling prophesies: although black Americans are overrepresented among the poor, the unemployed and the incarcerated, people who are poor, unemployed or incarcerated are also more likely to be seen and identify as black and less likely to be seen and identify as white.",
+                "content": ""
+            },
+            {
+                "markup": "Thus, not only does race shape social status, but social status shapes race.",
+                "content": ""
+            },
+            {
+                "markup": "1. Gossett TF (1997) Race: The History of an Idea in America (Oxford Univ Press, Oxford). 2. Omi M, Winant H (1994) Racial Formation in the United States: From the 1960s to the 1990s (Routledge, New York).",
+                "content": ""
+            },
+            {
+                "markup": "5. Davis FJ (2001) Who is Black? One Nation's Definition (Pennsylvania State Univ Press, University Park, PA).",
+                "content": ""
+            },
+            {
+                "markup": "8. Jacobson, MF (1999) Whiteness of a Different Color (Harvard Univ Press, Cambridge, MA).",
+                "content": ""
+            }
+        ]
     }
 ]
