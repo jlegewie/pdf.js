@@ -1379,7 +1379,11 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           annot.chars.push(charInfo);
         }
         // add space but exclude mini spaces
-        if (isSpace) {
+        // TWO VERSIONS IN CONFLICT ABOUT Lee-2008 and Penner-2008
+        // Should I use charDims.spaceWidth instead of charDims.width?
+        // What to add to brx below?
+        // if (isSpace && (annot.markupGeom[quad].brx < charDims.x + charDims.spaceWidth)) {
+        if (isSpace && (annot.markupGeom[quad].brx < charDims.x + lastChar.charDims.width)) {
           charInfo.character = character;
           // last char (a-z or digits)
           lastChar = this.getLastAZChar(annot);
