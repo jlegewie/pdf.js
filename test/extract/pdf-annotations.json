@@ -353,7 +353,7 @@
                 "content": ""
             },
             {
-                "markup": "Ethnic distinctions sometimes coincide with territorial segregation in the host society and with social constructions of racial identity. Widely acknowledged racial differences can sharpen in-group members' self-identification and out-group acknowledgment of intergroup distinctions.Similarly,when interaction between groups is limited and otherwise conditioned by territorial segregation, intergroup differences gain emphasis.Constraints on cross-group interaction contribute to the respective groups ignorance of one another. This, in turn, encourages stereotyping. Race and the segregating tendencies of territorial concentrations are not necessarily components of ethnic boundaries, but when one or both of these elements of social organization obtain,they can play important roles in the maintenance of ethnic boundaries.",
+                "markup": "Ethnic distinctions sometimes coincide with territorial segregation in the host society and with social constructions of racial identity. Widely acknowledged racial differences can sharpen in-group members' self-identification and out-group acknowledgment of intergroup distinctions. Similarly, when interaction between groups is limited and otherwise conditioned by territorial segregation, intergroup differences gain emphasis. Constraints on cross-group interaction contribute to the respective groups ignorance of one another. This, in turn, encourages stereotyping. Race and the segregating tendencies of territorial concentrations are not necessarily components of ethnic boundaries, but when one or both of these elements of social organization obtain, they can play important roles in the maintenance of ethnic boundaries.",
                 "content": ""
             },
             {
@@ -440,7 +440,7 @@
                 "content": ""
             },
             {
-                "markup": "is fixed at birth, and thus predates subsequent life outcomes, such as income or incarceration. Instead, we might think of individuals as having competing propensities for being classified into or identifying with different racial groups. Changes in these propensities likely ref lect, in part, the imprecision of dividing continuous human variation into a few discrete categories (7), as well as contextual variation in the location of racial divisions (1, 2, 5, 8). However, our findings also support the idea that racial propensities can be altered by changes in social position, much as a change in diet or stress level can alter a person's propensity to die of heart disease as opposed to cancer. This suggests that racial stereotypes can become self-fulfilling prophesies: although black Americans are overrepresented among the poor, the unemployed and the incarcerated, people who are poor, unemployed or incarcerated are also more likely to be seen and identify as black and less likely to be seen and identify as white.",
+                "markup": "is fixed at birth, and thus predates subsequent life outcomes, such as income or incarceration. Instead, we might think of individuals as having competing propensities for being classified into or identifying with different racial groups. Changes in these propensities likely reflect, in part, the imprecision of dividing continuous human variation into a few discrete categories (7), as well as contextual variation in the location of racial divisions (1, 2, 5, 8). However, our findings also support the idea that racial propensities can be altered by changes in social position, much as a change in diet or stress level can alter a person's propensity to die of heart disease as opposed to cancer. This suggests that racial stereotypes can become self-fulfilling prophesies: although black Americans are overrepresented among the poor, the unemployed and the incarcerated, people who are poor, unemployed or incarcerated are also more likely to be seen and identify as black and less likely to be seen and identify as white.",
                 "content": ""
             },
             {
@@ -459,6 +459,49 @@
                 "markup": "8. Jacobson, MF (1999) Whiteness of a Different Color (Harvard Univ Press, Cambridge, MA).",
                 "content": ""
             }
+        ]
+    },
+    {
+        "file": "/test/extract/pdf/Sharkey-Faber-2014.pdf",
+        "annotations": [
+            {
+                "markup": "The researchers collaborating on the study explored several possible explanations to help understand why the effect of moving out of public housing projects was so different in Baltimore and Chicago as compared to the three other MTO sites. School quality was an obvious choice as a potential explanation, but there was no evidence indicating that differences in school quality helped to account for variation in the effects of moving out of highpoverty communities. Children who moved out of disadvantaged neighborhoods in two independent public housing experiments conducted in Chicago experienced minimal improvements in school quality, yet they showed substantial increases in test score performance. The authors concluded that for students in extremely disadvantaged environments, changes in school quality may not be necessary to generate sharp improvements in test scores. An additional exploratory analysis suggested that the groups of students that experienced the largest improvements in test scores were those who moved out of the most intensely disadvantaged and violent communities, which were disproportionately found in the Chicago and Baltimore sites of MTO (Burdick-Will et al. 2011).",
+                "content": ""
+
+            },
+            {
+                "markup": "Family and Community Project, which provided families the chance",
+                "content": ""
+
+            },
+            {
+                "markup": "moved into a new mixed-income housing development",
+                "content": ""
+            }            
+        ]
+    },
+    {
+        "file": "/test/extract/pdf/Hipp-2007.pdf",
+        "annotations": [
+            {
+                "markup": "The importance of considering the level of aggregation is not new and is the basis of the modifiable areal unit problem (MAUP) (Openshaw and Taylor 1979, 1981). The MAUP occurs when aggregating processes that are not homogenous over the geographic area (Anselin",
+                "content": ""
+
+            }         
+        ]
+    },
+    {
+        "file": "/test/extract/pdf/Imbens-2004.pdf",
+        "annotations": [
+            {
+                "markup": "Recently there has been a surge in econometric work focusing on estimating averagetreatment effects under various sets of assumptions. One strand of this literature has developed methods for estimating average treatment effects for a binary treatment under assumptions variously described as exogeneity,unconfoundedness, or selection on observables.",
+                "content": ""
+
+            },
+            {
+                "markup": "The implication of these assumptions is that systematic (for example, average or distributional) differences in outcomes between treated and control units with the same values for these covariates are attributable to the treatment.",
+                "content": ""
+            }         
         ]
     }
 ]

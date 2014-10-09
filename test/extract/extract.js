@@ -6,51 +6,49 @@
 // http://localhost:8000/test/extract/index.html
 // http://localhost:8000/test/extract/index.html?version=0
 // http://localhost:8000/test/extract/index.html?branch=e7afce5549f3d1dcf052c4b23d1590bbfc2c338f
-
-// for debugging
 // http://localhost:8000/test/extract/index.html?version=0&file=/test/extract/pdf/Okihiro-2010.pdf&debug=1
 
 'use strict';
 
-// var url = 'https://raw2.github.com/jlegewie/pdf.js/{0}/{1}',
 var url = 'https://rawgit.com/jlegewie/pdf.js/{0}/{1}',
-    // script = 'https://raw2.github.com/jlegewie/pdf.js/809ed55841b0643892f7d6aac6999cca34f31db7/src/getPDFAnnotations.js',
-    script = 'https://rawgit.com/jlegewie/pdf.js/extract-v3.1/src/getPDFAnnotations.js',
+    script = 'https://rawgit.com/jlegewie/pdf.js/extract-v3.3/src/getPDFAnnotations.js',
     tooltips = {},
     getPDFAnnotations,
     pdfExtract = [{
-            // introducted in zotfile version 3.3
-            'version': '3.3dev',
-            'name': 'v3_3dev',
+            'version': '4.1dev',
+            'name': 'v4_1dev',
             'branch': 'local',
             'scripts': ['/src/shared/util.js',  '/src/core/colorspace.js', '/src/display/pattern_helper.js', '/src/core/function.js', '/src/core/annotation.js', '/src/display/api.js', '/src/display/metadata.js', '/src/display/canvas.js', '/src/display/font_loader.js', '/src/display/webgl.js', '/src/getPDFAnnotations.js'],
             'worker': '/src/worker_loader.js'
         },
         {
-            // introducted in zotfile version 3.3
-            'version': '3.1',
-            'name': 'v3_1',
+            'version': '4.0',
+            'name': 'v4_0',
+            'branch': '9631a41d53709e355da41daed202bfefa7ff67d2',
+            'scripts': ['/src/shared/util.js',  '/src/core/colorspace.js', '/src/display/pattern_helper.js', '/src/core/function.js', '/src/core/annotation.js', '/src/display/api.js', '/src/display/metadata.js', '/src/display/canvas.js', '/src/display/font_loader.js', '/src/display/webgl.js', '/src/getPDFAnnotations.js'],
+            'worker': '/src/worker_loader.js'
+        },
+        {
+            'version': '3.3',
+            'name': 'v3_3',
             'branch': 'extract-v3.1',
             'scripts': ['src/shared/util.js', 'src/shared/colorspace.js', 'src/display/pattern_helper.js', 'src/shared/function.js', 'src/shared/annotation.js', 'src/display/api.js', 'src/display/metadata.js', 'src/display/canvas.js', 'src/display/font_loader.js', script],
             'worker': 'src/worker_loader.js'
-            },
+        },
         {
-            // introducted in zotfile version 3.2
-            'version': '3',
-            'name': 'v3',
+            'version': '3.2',
+            'name': 'v3_2',
             'branch': 'extract-v3',
             'scripts': ['src/shared/util.js', 'src/shared/colorspace.js', 'src/display/pattern_helper.js', 'src/shared/function.js', 'src/shared/annotation.js', 'src/display/api.js', 'src/display/metadata.js', 'src/display/canvas.js', 'src/display/font_loader.js', script],
             'worker': 'src/worker_loader.js'
-            }/*,
+        },
         {
-            // introducted in zotfile version 3.0
-            // (Zou 2006 fix introduced in 3.1)
-            'version': '2',
-            'name': 'v2',
+            'version': '3.1',
+            'name': 'v3_1',
             'branch': 'extract-v2',
             'scripts': ['src/network.js', 'src/chunked_stream.js', 'src/pdf_manager.js', 'src/core.js', 'src/util.js', 'src/api.js', 'src/canvas.js', 'src/obj.js', 'src/function.js', 'src/charsets.js', 'src/cidmaps.js', 'src/colorspace.js', 'src/crypto.js', 'src/evaluator.js', 'src/fonts.js', 'src/glyphlist.js', 'src/image.js', 'src/metrics.js', 'src/parser.js', 'src/pattern.js', 'src/stream.js', 'src/worker.js', 'external/jpgjs/jpg.js', 'src/jpx.js', 'src/jbig2.js', script],
             'worker': 'src/worker_loader.js'
-        }*/];
+        }];
 
 // get url arguments
 var arg = getQueryParams(document.location.search),
