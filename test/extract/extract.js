@@ -11,7 +11,7 @@
 'use strict';
 
 var url = 'https://rawgit.com/jlegewie/pdf.js/{0}/{1}',
-    script = 'https://rawgit.com/jlegewie/pdf.js/extract-v3.3/src/getPDFAnnotations.js',
+    script = 'https://rawgit.com/jlegewie/pdf.js/extract-v4/src/getPDFAnnotations.js',
     tooltips = {},
     getPDFAnnotations,
     pdfExtract = [{
