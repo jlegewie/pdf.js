@@ -494,7 +494,7 @@
         "file": "/test/extract/pdf/Imbens-2004.pdf",
         "annotations": [
             {
-                "markup": "Recently there has been a surge in econometric work focusing on estimating averagetreatment effects under various sets of assumptions. One strand of this literature has developed methods for estimating average treatment effects for a binary treatment under assumptions variously described as exogeneity,unconfoundedness, or selection on observables.",
+                "markup": "Recently there has been a surge in econometric work focusing on estimating average treatment effects under various sets of assumptions. One strand of this literature has developed methods for estimating average treatment effects for a binary treatment under assumptions variously described as exogeneity,unconfoundedness, or selection on observables.",
                 "content": ""
 
             },

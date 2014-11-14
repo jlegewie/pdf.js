@@ -22,6 +22,13 @@ var url = 'https://rawgit.com/jlegewie/pdf.js/{0}/{1}',
             'worker': '/src/worker_loader.js'
         },
         {
+            'version': '4.1',
+            'name': 'v4_1',
+            'branch': 'extract-v4',
+            'scripts': ['/src/shared/util.js',  '/src/core/colorspace.js', '/src/display/pattern_helper.js', '/src/core/function.js', '/src/core/annotation.js', '/src/display/api.js', '/src/display/metadata.js', '/src/display/canvas.js', '/src/display/font_loader.js', '/src/display/webgl.js', '/src/getPDFAnnotations.js'],
+            'worker': '/src/worker_loader.js'
+        },
+        {
             'version': '4.0',
             'name': 'v4_0',
             'branch': '9631a41d53709e355da41daed202bfefa7ff67d2',
