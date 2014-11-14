@@ -14,22 +14,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* globals RenderingStates, PDFView, PDFHistory, PDFJS, mozL10n, CustomStyle,
-           PresentationMode, scrollIntoView, SCROLLBAR_PADDING, CSS_UNITS,
-           UNKNOWN_SCALE, DEFAULT_SCALE, getOutputScale, TextLayerBuilder,
-           cache, Stats */
+/* globals RenderingStates, PDFJS, mozL10n, CustomStyle, getOutputScale, Stats,
+           CSS_UNITS */
 
 'use strict';
 
-var PageView = function pageView(container, id, scale,
-                                 navigateTo, defaultViewport) {
+/**
+ * @constructor
+ * @param {HTMLDivElement} container - The viewer element.
+ * @param {number} id - The page unique ID (normally its number).
+ * @param {number} scale - The page scale display.
+ * @param {PageViewport} defaultViewport - The page viewport.
+ * @param {IPDFLinkService} linkService - The navigation/linking service.
+ * @param {PDFRenderingQueue} renderingQueue - The rendering queue object.
+ * @param {Cache} cache - The page cache.
+ * @param {PDFPageSource} pageSource
+ * @param {PDFViewer} viewer
+ *
+ * @implements {IRenderableView}
+ */
+var PageView = function pageView(container, id, scale, defaultViewport,
+                                 linkService, renderingQueue, cache,
+                                 pageSource, viewer) {
   this.id = id;
+  this.renderingId = 'page' + id;
 
   this.rotation = 0;
   this.scale = scale || 1.0;
   this.viewport = defaultViewport;
   this.pdfPageRotate = defaultViewport.rotation;
   this.hasRestrictedScaling = false;
+
+  this.linkService = linkService;
+  this.renderingQueue = renderingQueue;
+  this.cache = cache;
+  this.pageSource = pageSource;
+  this.viewer = viewer;
 
   this.renderingState = RenderingStates.INITIAL;
   this.resume = null;
@@ -241,10 +261,10 @@ var PageView = function pageView(container, id, scale,
   function setupAnnotations(pageDiv, pdfPage, viewport) {
 
     function bindLink(link, dest) {
-      link.href = PDFView.getDestinationHash(dest);
+      link.href = linkService.getDestinationHash(dest);
       link.onclick = function pageViewSetupLinksOnclick() {
         if (dest) {
-          PDFView.navigateTo(dest);
+          linkService.navigateTo(dest);
         }
         return false;
       };
@@ -254,47 +274,9 @@ var PageView = function pageView(container, id, scale,
     }
 
     function bindNamedAction(link, action) {
-      link.href = PDFView.getAnchorUrl('');
+      link.href = linkService.getAnchorUrl('');
       link.onclick = function pageViewSetupNamedActionOnClick() {
-        // See PDF reference, table 8.45 - Named action
-        switch (action) {
-          case 'GoToPage':
-            document.getElementById('pageNumber').focus();
-            break;
-
-          case 'GoBack':
-            PDFHistory.back();
-            break;
-
-          case 'GoForward':
-            PDFHistory.forward();
-            break;
-
-          case 'Find':
-            if (!PDFView.supportsIntegratedFind) {
-              PDFView.findBar.toggle();
-            }
-            break;
-
-          case 'NextPage':
-            PDFView.page++;
-            break;
-
-          case 'PrevPage':
-            PDFView.page--;
-            break;
-
-          case 'LastPage':
-            PDFView.page = PDFView.pages.length;
-            break;
-
-          case 'FirstPage':
-            PDFView.page = 1;
-            break;
-
-          default:
-            break; // No action according to spec
-        }
+        linkService.executeNamedAction(action);
         return false;
       };
       link.className = 'internalLink';
@@ -375,99 +357,6 @@ var PageView = function pageView(container, id, scale,
     return this.viewport.convertToPdfPoint(x, y);
   };
 
-  this.scrollIntoView = function pageViewScrollIntoView(dest) {
-    if (PresentationMode.active) {
-      if (PDFView.page !== this.id) {
-        // Avoid breaking PDFView.getVisiblePages in presentation mode.
-        PDFView.page = this.id;
-        return;
-      }
-      dest = null;
-      PDFView.setScale(PDFView.currentScaleValue, true, true);
-    }
-    if (!dest) {
-      scrollIntoView(div);
-      return;
-    }
-
-    var x = 0, y = 0;
-    var width = 0, height = 0, widthScale, heightScale;
-    var changeOrientation = (this.rotation % 180 === 0 ? false : true);
-    var pageWidth = (changeOrientation ? this.height : this.width) /
-      this.scale / CSS_UNITS;
-    var pageHeight = (changeOrientation ? this.width : this.height) /
-      this.scale / CSS_UNITS;
-    var scale = 0;
-    switch (dest[1].name) {
-      case 'XYZ':
-        x = dest[2];
-        y = dest[3];
-        scale = dest[4];
-        // If x and/or y coordinates are not supplied, default to
-        // _top_ left of the page (not the obvious bottom left,
-        // since aligning the bottom of the intended page with the
-        // top of the window is rarely helpful).
-        x = x !== null ? x : 0;
-        y = y !== null ? y : pageHeight;
-        break;
-      case 'Fit':
-      case 'FitB':
-        scale = 'page-fit';
-        break;
-      case 'FitH':
-      case 'FitBH':
-        y = dest[2];
-        scale = 'page-width';
-        break;
-      case 'FitV':
-      case 'FitBV':
-        x = dest[2];
-        width = pageWidth;
-        height = pageHeight;
-        scale = 'page-height';
-        break;
-      case 'FitR':
-        x = dest[2];
-        y = dest[3];
-        width = dest[4] - x;
-        height = dest[5] - y;
-        widthScale = (PDFView.container.clientWidth - SCROLLBAR_PADDING) /
-          width / CSS_UNITS;
-        heightScale = (PDFView.container.clientHeight - SCROLLBAR_PADDING) /
-          height / CSS_UNITS;
-        scale = Math.min(Math.abs(widthScale), Math.abs(heightScale));
-        break;
-      default:
-        return;
-    }
-
-    if (scale && scale !== PDFView.currentScale) {
-      PDFView.setScale(scale, true, true);
-    } else if (PDFView.currentScale === UNKNOWN_SCALE) {
-      PDFView.setScale(DEFAULT_SCALE, true, true);
-    }
-
-    if (scale === 'page-fit' && !dest[4]) {
-      scrollIntoView(div);
-      return;
-    }
-
-    var boundingRect = [
-      this.viewport.convertToViewportPoint(x, y),
-      this.viewport.convertToViewportPoint(x + width, y + height)
-    ];
-    var left = Math.min(boundingRect[0][0], boundingRect[1][0]);
-    var top = Math.min(boundingRect[0][1], boundingRect[1][1]);
-
-    scrollIntoView(div, { left: left, top: top });
-  };
-
-  this.getTextContent = function pageviewGetTextContent() {
-    return PDFView.getPage(this.id).then(function(pdfPage) {
-      return pdfPage.getTextContent();
-    });
-  };
-
   this.draw = function pageviewDraw(callback) {
     var pdfPage = this.pdfPage;
 
@@ -475,7 +364,7 @@ var PageView = function pageView(container, id, scale,
       return;
     }
     if (!pdfPage) {
-      var promise = PDFView.getPage(this.id);
+      var promise = this.pageSource.getPage();
       promise.then(function(pdfPage) {
         delete this.pagePdfPromise;
         this.setPdfPage(pdfPage);
@@ -543,6 +432,7 @@ var PageView = function pageView(container, id, scale,
     canvas._viewport = viewport;
 
     var textLayerDiv = null;
+    var textLayer = null;
     if (!PDFJS.disableTextLayer) {
       textLayerDiv = document.createElement('div');
       textLayerDiv.className = 'textLayer';
@@ -554,16 +444,12 @@ var PageView = function pageView(container, id, scale,
       } else {
         div.appendChild(textLayerDiv);
       }
+
+      textLayer = this.viewer.createTextLayerBuilder(textLayerDiv, this.id - 1,
+                                                     this.viewport);
     }
-    var textLayer = this.textLayer =
-      textLayerDiv ? new TextLayerBuilder({
-        textLayerDiv: textLayerDiv,
-        pageIndex: this.id - 1,
-        lastScrollSource: PDFView,
-        viewport: this.viewport,
-        isViewerInPresentationMode: PresentationMode.active,
-        findController: PDFView.findController
-      }) : null;
+    this.textLayer = textLayer;
+
     // TODO(mack): use data attributes to store these
     ctx._scaleX = outputScale.sx;
     ctx._scaleY = outputScale.sy;
@@ -598,22 +484,7 @@ var PageView = function pageView(container, id, scale,
         self.zoomLayer = null;
       }
 
-//#if (FIREFOX || MOZCENTRAL)
-//    if (self.textLayer && self.textLayer.textDivs &&
-//        self.textLayer.textDivs.length > 0 &&
-//        !PDFView.supportsDocumentColors) {
-//      console.error(mozL10n.get('document_colors_disabled', null,
-//        'PDF documents are not allowed to use their own colors: ' +
-//        '\'Allow pages to choose their own colors\' ' +
-//        'is deactivated in the browser.'));
-//      PDFView.fallback();
-//    }
-//#endif
-      if (error) {
-        PDFView.error(mozL10n.get('rendering_error', null,
-          'An error occurred while rendering the page.'), error);
-      }
-
+      self.error = error;
       self.stats = pdfPage.stats;
       self.updateStats();
       if (self.onAfterDraw) {
@@ -626,18 +497,6 @@ var PageView = function pageView(container, id, scale,
       });
       div.dispatchEvent(event);
 
-//#if (FIREFOX || MOZCENTRAL)
-//    FirefoxCom.request('reportTelemetry', JSON.stringify({
-//      type: 'pageInfo'
-//    }));
-//    // It is a good time to report stream and font types
-//    PDFView.pdfDocument.getStats().then(function (stats) {
-//      FirefoxCom.request('reportTelemetry', JSON.stringify({
-//        type: 'documentStats',
-//        stats: stats
-//      }));
-//    });
-//#endif
       callback();
     }
 
@@ -646,7 +505,7 @@ var PageView = function pageView(container, id, scale,
       viewport: this.viewport,
       // intent: 'default', // === 'display'
       continueCallback: function pdfViewcContinueCallback(cont) {
-        if (PDFView.highestPriorityPage !== 'page' + self.id) {
+        if (!self.renderingQueue.isHighestPriority(self)) {
           self.renderingState = RenderingStates.PAUSED;
           self.resume = function resumeCallback() {
             self.renderingState = RenderingStates.RUNNING;
@@ -663,7 +522,7 @@ var PageView = function pageView(container, id, scale,
       function pdfPageRenderCallback() {
         pageViewDrawCallback(null);
         if (textLayer) {
-          self.getTextContent().then(
+          self.pdfPage.getTextContent().then(
             function textContentResolved(textContent) {
               textLayer.setTextContent(textContent);
             }
