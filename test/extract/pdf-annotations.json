@@ -503,5 +503,31 @@
                 "content": ""
             }         
         ]
+    },
+    {
+        "file": "/test/extract/pdf/Lindo-2012.pdf",
+        "annotations": [
+            {
+                "markup": "Clotfelter (2011) examines the number of JSTOR articles viewed (as a measure of work done by students and faculty) at 78 research libraries around the time of the NCAA basketball tournament. He finds that having a team in the tournament reduces the number of article views and, further, that unexpected wins have especially large effects.",
+                "content": ""
+
+            },
+            {
+                "markup": "In this paper, we build on this earlier work by considering how academic performance at a large public university varies with the prominence of university football on campus, as measured by the team's winning percentage in a given year.",
+                "content": ""
+            },
+            {
+                "markup": "The 2008 American Community Survey shows that 24 to 29 year-old females are 17 percent more likely to have attended college and 29 percent more likely to have completed a baccalaureate degree than similarly aged males.",
+                "content": ""
+            },
+            {
+                "markup": "For example, males have been found to be less responsive, if responsive at all, to achievement awards (Angrist and Lavy 2009; Angrist, Lang, Oreopoulos 2009), tuition reductions (Dynarski 2008), and offers of academic advising (Angrist, Lang, Oreopoulos 2009). Lindo, Sanders, and Oreopoulos (2010) find that being placed on academic probation improves the grades of returning females more than returning males, but that it causes males to drop out and has no such impact on females. Babcock and Marks (2011) document that female students study more than their male counterparts.",
+                "content": ""
+            },
+            {
+                "markup": "In particular, Stinebrickner and Stinebrickner (2006); Han and Li (2009); and Carrell, Hoekstra, and West (2011b) find greater peer effects among females. Foster (2006) finds larger effects for males but concludes that there is \"little evidence of robust residential peer effects on undergraduate performance.\" Kremer and Levy (2008) finds that being assigned a heavily drinking roommate affects males more than females. Carrell, Hoekstra, and West (2011a) finds that the effect of legal access to alcohol is similar for males and females; and Lindo, Swensen, and Waddell (2011) finds that legal access affects females but not males.",
+                "content": ""
+            }         
+        ]
     }
 ]
