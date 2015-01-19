@@ -107,12 +107,26 @@ var Annotation = (function AnnotationClosure() {
     }
     
     var color = dict.get('C');
-    if (isArray(color) && color.length === 3) {
-      // TODO(mack): currently only supporting rgb; need support different
-      // colorspaces
-      data.color = color;
-    } else {
+    if (!color) {
+      // The PDF spec does not mention how a missing color array is interpreted.
+      // Adobe Reader seems to default to black in this case.
       data.color = [0, 0, 0];
+    } else if (isArray(color)) {
+      switch (color.length) {
+        case 0:
+          // Empty array denotes transparent border.
+          data.color = null;
+          break;
+        case 1:
+          // TODO: implement DeviceGray
+          break;
+        case 3:
+          data.color = color;
+          break;
+        case 4:
+          // TODO: implement DeviceCMYK
+          break;
+      }
     }
 
     // Some types of annotations have border style dict which has more
@@ -129,7 +143,7 @@ var Annotation = (function AnnotationClosure() {
       if (data.borderWidth > 0 && dashArray) {
         if (!isArray(dashArray)) {
           // Ignore the border if dashArray is not actually an array,
-          // this is consistent with the behaviour in Adobe Reader. 
+          // this is consistent with the behaviour in Adobe Reader.
           data.borderWidth = 0;
         } else {
           var dashArrayLength = dashArray.length;
@@ -552,11 +566,7 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
     return url;
   }
 
-  Util.inherit(LinkAnnotation, InteractiveAnnotation, {
-    hasOperatorList: function LinkAnnotation_hasOperatorList() {
-      return false;
-    }
-  });
+  Util.inherit(LinkAnnotation, InteractiveAnnotation, { });
 
   return LinkAnnotation;
 })();

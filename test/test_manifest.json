@@ -499,6 +499,22 @@
        "link": false,
        "type": "eq"
     },
+    {  "id": "issue5509",
+       "file": "pdfs/issue5509.pdf",
+       "md5": "1975ef8db7355b1d691bc79d0749574b",
+       "rounds": 1,
+       "link": true,
+       "firstPage": 1,
+       "lastPage": 1,
+       "type": "load"
+    },
+    {  "id": "issue5599",
+       "file": "pdfs/issue5599.pdf",
+       "md5": "529a4a9409ac024aeb57a047210280fe",
+       "rounds": 1,
+       "link": false,
+       "type": "load"
+    },
     {  "id": "txt2pdf",
        "file": "pdfs/txt2pdf.pdf",
        "md5": "02cefa0f5e8d96313bb05163b2f88c8c",
@@ -605,6 +621,14 @@
        "rounds": 1,
        "type": "eq",
        "about": "Glyph accent drawn as curves."
+    },
+    {  "id": "issue5138",
+       "file": "pdfs/issue5138.pdf",
+       "md5": "9931686d7dee0df62640fbf58bed3323",
+       "link": false,
+       "rounds": 1,
+       "type": "eq",
+       "about": "Glyph that gets mapped to unicode non-breaking-space."
     },
     {  "id": "simpletype3font",
        "file": "pdfs/simpletype3font.pdf",
@@ -927,6 +951,20 @@
        "rounds": 1,
        "type": "eq"
     },
+    {  "id": "issue4379",
+       "file": "pdfs/issue4379.pdf",
+       "md5": "09715ec1a7b0f3a7ae02b3046f627b9f",
+       "link": false,
+       "rounds": 1,
+       "type": "eq"
+    },
+    {  "id": "issue4722",
+       "file": "pdfs/issue4722.pdf",
+       "md5": "a42ca858af7d179358f92f47e57c0fed",
+       "link": false,
+       "rounds": 1,
+       "type": "eq"
+    },
     {  "id": "issue4875",
        "file": "pdfs/issue4875.pdf",
        "md5": "9a558e18029a42c0ef4e9a8755e24733",
@@ -1039,6 +1077,15 @@
       "rounds": 1,
       "link": true,
       "type": "eq"
+    },
+    {  "id": "bug1064894",
+       "file": "pdfs/bug1064894.pdf",
+       "md5": "22971b6a24912bca9c773379c10ef18a",
+       "rounds": 1,
+       "link": true,
+       "firstPage": 1,
+       "lastPage": 1,
+       "type": "eq"
     },
     {  "id": "bug1065245",
        "file": "pdfs/bug1065245.pdf",
@@ -1506,6 +1553,24 @@
       "type": "eq",
       "about": "Type3 font with negative HScale and font size"
     },
+    {  "id": "bug1077808",
+       "file": "pdfs/bug1077808.pdf",
+       "md5": "4a4bfc27e3fafe2f74e7a4a4cd04b8dc",
+       "rounds": 1,
+       "lastPage": 1,
+       "link": true,
+       "type": "eq",
+       "about": "Inline image with ASCII85Decode filter."
+    },
+    {  "id": "bug1108753",
+       "file": "pdfs/bug1108753.pdf",
+       "md5": "a7aaf92d55b4602afb0ca3d75198b56b",
+       "rounds": 1,
+       "link": true,
+       "firstPage": 1,
+       "lastPage": 1,
+       "type": "eq"
+    },
     {  "id": "bug816075",
       "file": "pdfs/bug816075.pdf",
       "md5": "7ec87c115c1f9ec41234cc7002555e82",
@@ -1874,5 +1939,33 @@
        "rounds": 1,
        "link": true,
        "type": "eq"
+    },
+    {  "id": "issue5592",
+       "file": "pdfs/issue5592.pdf",
+       "md5": "a0750f95afa80c880f7966df7062616c",
+       "rounds": 1,
+       "link": true,
+       "type": "eq"
+    },
+    {  "id": "issue5549.pdf",
+       "file": "pdfs/issue5549.pdf",
+       "md5": "6c36df6ebc583c9e18aad0ad00d257b8",
+       "rounds": 1,
+       "type": "eq",
+       "about": "Free image obtained from www.unsplash.com"
+    },
+    {  "id": "issue5475.pdf",
+       "file": "pdfs/issue5475.pdf",
+       "md5": "bda962373570ac4dfe0fbd1ad4f0d9ef",
+       "rounds": 1,
+       "type": "eq",
+       "about": "Free image obtained from www.unsplash.com"
+    },
+    {  "id": "issue5481.pdf",
+       "file": "pdfs/issue5481.pdf",
+       "md5": "cf00bd25b15b7e23542b48a626585c36",
+       "rounds": 1,
+       "type": "eq",
+       "about": "Free image obtained from www.unsplash.com"
     }
 ]

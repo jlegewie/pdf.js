@@ -478,8 +478,8 @@ html[dir='ltr'] .doorHangerRight:before {
   color: #A6B7D0;
 }
 
-.notFound {
-  background-color: rgb(255, 137, 153);
+#findInput.notFound {
+  background-color: rgb(255, 102, 102);
 }
 
 html[dir='ltr'] #toolbarViewerLeft {
@@ -755,8 +755,6 @@ html[dir='rtl'] .dropdownToolbarButton {
 }
 
 .dropdownToolbarButton > select {
-  -webkit-appearance: none;
-  -moz-appearance: none; /* in the future this might matter, see bugzilla bug #649849 */
   min-width: 140px;
   font-size: 12px;
   color: hsl(0,0%,95%);
@@ -1258,18 +1256,11 @@ html[dir='rtl'] .attachmentsItem > button {
   cursor: default;
 }
 
-
 /* TODO: file FF bug to support ::-moz-selection:window-inactive
    so we can override the opaque grey background when the window is inactive;
    see https://bugzilla.mozilla.org/show_bug.cgi?id=706209 */
 ::selection { background: rgba(0,0,255,0.3); }
 ::-moz-selection { background: rgba(0,0,255,0.3); }
-
-.textLayer ::selection { background: rgb(0,0,255); }
-.textLayer ::-moz-selection { background: rgb(0,0,255); }
-.textLayer {
-  opacity: 0.2;
-}
 
 #errorWrapper {
   background: none repeat scroll 0 0 #FF5555;
@@ -1719,6 +1710,10 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
     top: 0;
     left: 0;
     display: block;
+  }
+  #printContainer div {
+    page-break-after: always;
+    page-break-inside: avoid;
   }
 }
 

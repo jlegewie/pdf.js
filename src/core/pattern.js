@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 /* globals ColorSpace, PDFFunction, Util, error, warn, info, isArray, isStream,
-           assert, isPDFFunction, UnsupportedManager, UNSUPPORTED_FEATURES */
+           assert, isPDFFunction, UnsupportedManager, UNSUPPORTED_FEATURES,
+           MissingDataException */
 
 'use strict';
 
@@ -49,19 +50,27 @@ var Pattern = (function PatternClosure() {
     var dict = isStream(shading) ? shading.dict : shading;
     var type = dict.get('ShadingType');
 
-    switch (type) {
-      case PatternType.AXIAL:
-      case PatternType.RADIAL:
-        // Both radial and axial shadings are handled by RadialAxial shading.
-        return new Shadings.RadialAxial(dict, matrix, xref, res);
-      case PatternType.FREE_FORM_MESH:
-      case PatternType.LATTICE_FORM_MESH:
-      case PatternType.COONS_PATCH_MESH:
-      case PatternType.TENSOR_PATCH_MESH:
-        return new Shadings.Mesh(shading, matrix, xref, res);
-      default:
-        UnsupportedManager.notify(UNSUPPORTED_FEATURES.shadingPattern);
-        return new Shadings.Dummy();
+    try {
+      switch (type) {
+        case PatternType.AXIAL:
+        case PatternType.RADIAL:
+          // Both radial and axial shadings are handled by RadialAxial shading.
+          return new Shadings.RadialAxial(dict, matrix, xref, res);
+        case PatternType.FREE_FORM_MESH:
+        case PatternType.LATTICE_FORM_MESH:
+        case PatternType.COONS_PATCH_MESH:
+        case PatternType.TENSOR_PATCH_MESH:
+          return new Shadings.Mesh(shading, matrix, xref, res);
+        default:
+          throw new Error('Unknown PatternType: ' + type);
+      }
+    } catch (ex) {
+      if (ex instanceof MissingDataException) {
+        throw ex;
+      }
+      UnsupportedManager.notify(UNSUPPORTED_FEATURES.shadingPattern);
+      warn(ex);
+      return new Shadings.Dummy();
     }
   };
   return Pattern;
@@ -146,14 +155,14 @@ Shadings.RadialAxial = (function RadialAxialClosure() {
       ratio[0] = i;
       fn(ratio, 0, color, 0);
       rgbColor = cs.getRgb(color, 0);
-      var cssColor = Util.makeCssRgb(rgbColor);
+      var cssColor = Util.makeCssRgb(rgbColor[0], rgbColor[1], rgbColor[2]);
       colorStops.push([(i - t0) / diff, cssColor]);
     }
 
     var background = 'transparent';
     if (dict.has('Background')) {
       rgbColor = cs.getRgb(dict.get('Background'), 0);
-      background = Util.makeCssRgb(rgbColor);
+      background = Util.makeCssRgb(rgbColor[0], rgbColor[1], rgbColor[2]);
     }
 
     if (!extendStart) {
