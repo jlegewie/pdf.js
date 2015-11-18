@@ -68,7 +68,7 @@
             {
                 "markup": "mpilation technique for dynamically-typed languages that identifies frequently executed loop traces at run-time and then generates machine code on the fly that is specialized for the actual dynamic types occurring on each path through the loop. Our method provides cheap inter-procedural type specialization, and an elegant and efficient way",
                 "content":""
-            },  
+            },
             {
                 "markup": "ed on the expectation that programs spend most of their time in hot loops. Even in dynamically typed languages, we expect hot loops to be mostly type-stable, meaning that the types of values are invariant. (12) For example, we would expect loop counters that start as i",
                 "content":""
@@ -340,7 +340,7 @@
                 "content": ""
             }
         ]
-    },   
+    },
     {
         "file": "/test/extract/pdf/Sanders-2002.pdf",
         "annotations": [
@@ -361,7 +361,7 @@
                 "content": ""
             }
         ]
-    },   
+    },
     {
         "file": "/test/extract/pdf/OBrien-2013.pdf",
         "annotations": [
@@ -406,7 +406,7 @@
                 "content": "I like the concept \"civic response rate\" and the more detailed discussion of this issue."
             }
         ]
-    },   
+    },
     {
         "file": "/test/extract/pdf/Lee-2008.pdf",
         "annotations": [
@@ -427,7 +427,7 @@
                 "content": ""
             }
         ]
-    },   
+    },
     {
         "file": "/test/extract/pdf/Penner-2008.pdf",
         "annotations": [
@@ -477,7 +477,7 @@
             {
                 "markup": "moved into a new mixed-income housing development",
                 "content": ""
-            }            
+            }
         ]
     },
     {
@@ -487,7 +487,7 @@
                 "markup": "The importance of considering the level of aggregation is not new and is the basis of the modifiable areal unit problem (MAUP) (Openshaw and Taylor 1979, 1981). The MAUP occurs when aggregating processes that are not homogenous over the geographic area (Anselin",
                 "content": ""
 
-            }         
+            }
         ]
     },
     {
@@ -501,7 +501,7 @@
             {
                 "markup": "The implication of these assumptions is that systematic (for example, average or distributional) differences in outcomes between treated and control units with the same values for these covariates are attributable to the treatment.",
                 "content": ""
-            }         
+            }
         ]
     },
     {
@@ -527,7 +527,25 @@
             {
                 "markup": "In particular, Stinebrickner and Stinebrickner (2006); Han and Li (2009); and Carrell, Hoekstra, and West (2011b) find greater peer effects among females. Foster (2006) finds larger effects for males but concludes that there is \"little evidence of robust residential peer effects on undergraduate performance.\" Kremer and Levy (2008) finds that being assigned a heavily drinking roommate affects males more than females. Carrell, Hoekstra, and West (2011a) finds that the effect of legal access to alcohol is similar for males and females; and Lindo, Swensen, and Waddell (2011) finds that legal access affects females but not males.",
                 "content": ""
-            }         
+            }
+        ]
+    },
+    {
+        "file": "/test/extract/pdf/Smith-Holmes-2014.pdf",
+        "annotations": [
+            {
+                "markup": "Stereotyping of outgroup members may exacerbate emotional responses. Stereotypic attributions about outgroup members' behavior conserve mental resources and facilitate routine day-to-day interactions in cognitively taxing environments (Holmes and Smith 2008, 2012). While simplifying a complex social world, stereotypes also foster gross misperceptions. Police stereotypes of minority citizens, which conflate race and violent criminality, parallel those of the larger society and may be continually reinforced by selective personal experience and departmental folklore (e.g., Bolton and Feagin 2004; NAACP and Criminal Justice Institute at Harvard Law School 1995; Smith and Alpert 2007). Officers who work in districts with large populations, high rates of violent crime, and greater concentrations of minorities may be especially prone to stereotypic responses to minority citizens (Correll et al. 2007), including acts of gratuitous force against citizens encountered there (Holmes and Smith 2008, 2012).",
+                "content": ""
+            }
+        ]
+    },
+    {
+        "file": "/test/extract/pdf/Eitle-2002.pdf",
+        "annotations": [
+            {
+                "markup": "The often observed association between the size of the black population and the amount ofsocial control imposed on blacks has been interpreted as consistent with one of three conceptually distinct perspectives: (1) the political threat hypothesis, (2) the economic threat hypothesis, and (3) the threat of black crime hypothesis.",
+                "content": ""
+            }
         ]
     }
 ]
